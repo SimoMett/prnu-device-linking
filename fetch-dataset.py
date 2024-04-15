@@ -22,8 +22,11 @@ def fetch_dataset(devices: list):
     # make dirs and download the files
     for url in url_list:
         print("Downloading", url)
-        resp = requests.get(url)
         file_dest = url.replace(floreview_url, "")
+        if os.path.exists(file_dest):
+            print("Skipping. Already exists")
+            continue
+        resp = requests.get(url)
         os.makedirs(os.path.dirname(file_dest), exist_ok=True)
         with open(file_dest, "wb") as f:
             f.write(resp.content)

@@ -35,4 +35,4 @@ def fetch_dataset(devices: list):
 
 
 if __name__ == "__main__":
-    fetch_dataset([22, 24, 19, 34, 5, 34, 40, 39, 32, 17, 38, 4])
+    fetch_dataset([2, 24, 19, 34, 5, 34, 40, 39, 32, 17, 38, 4])

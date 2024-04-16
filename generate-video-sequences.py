@@ -45,8 +45,8 @@ def concatenate_videos(videos: list, output: str):
             clips.append(splits_map[videos[1]][0].stream(splits_map[videos[1]][1]))
             splits_map[videos[1]][1] += 1
 
-    # Finally, generate output
-    ffmpeg.concat(*clips).output(output).overwrite_output().run()
+    # Finally, stretch every clip to 1080p and generate output
+    ffmpeg.concat(*[c.filter("scale", "1920-1080") for c in clips]).output(output).overwrite_output().run()
 
 
 def generate_video_sequence(sequence, l, s, output: str):
@@ -60,7 +60,7 @@ def generate_video_sequence(sequence, l, s, output: str):
 
 def get_video_path(device, l, s):
     result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*")
-    # assert len(result) == 1
+    assert len(result) == 1
     return result
 
 
@@ -101,4 +101,4 @@ def debug_main():
 
 
 if __name__ == "__main__":
-    debug_main()
+    main()

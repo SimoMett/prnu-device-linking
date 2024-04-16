@@ -59,8 +59,10 @@ def generate_video_sequence(sequence, l, s, output: str):
 
 
 def get_video_path(device, l, s):
-    result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*")
-    assert len(result) == 1
+    result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mp4")
+    if not result:
+        result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.MOV")
+    # assert len(result) == 1
     return result
 
 

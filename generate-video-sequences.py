@@ -65,7 +65,7 @@ def get_video_path(device, l, s):
 
 
 locations_cnt = 7
-scenes_cnt = 5  # used to be 6, but dataset is lacking
+scenes_cnt = 4  # used to be 6, but dataset is lacking
 brand_devices_cnt = 2
 devices_pairs = [
     (2, 24),
@@ -93,8 +93,8 @@ def main():
 
 
 def debug_main():
-    l = 2
-    s = 2
+    l = 5
+    s = 5
     d = 1
     output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
     generate_video_sequence(sequences[d], l, s, output)

@@ -1,4 +1,4 @@
-- Non tutti i dispositivi hanno il campione S6. Quindi per il momento è stato ristretto 'scenes_cnt' a 5.
+- Non tutti i dispositivi hanno il campione S6 e S5. Quindi per il momento è stato ristretto 'scenes_cnt' a 4.
 - I dispositivi D40 e D02 (entrambi iPhoneX) hanno un dataset parziale
 - Il dispositivo iPadAir ha filmati con risoluzione ridotta (1270x720) rispetto alla standard 1920x1080. Fare stretching?
 - Il video L2S2 dello Xiaomi RedmiNote8T è stato filmato in orizzontale.

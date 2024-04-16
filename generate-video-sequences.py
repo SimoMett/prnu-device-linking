@@ -46,7 +46,7 @@ def concatenate_videos(videos: list, output: str):
             splits_map[videos[1]][1] += 1
 
     # Finally, stretch every clip to 1080p and generate output
-    ffmpeg.concat(*[c.filter("scale", "1920-1080") for c in clips]).output(output).overwrite_output().run()
+    ffmpeg.concat(*[c.filter("scale", "1920-1080").filter("setsar", "1-1") for c in clips]).output(output).overwrite_output().run()
 
 
 def generate_video_sequence(sequence, l, s, output: str):
@@ -93,8 +93,8 @@ def main():
 
 
 def debug_main():
-    l = 1
-    s = 1
+    l = 2
+    s = 2
     d = 1
     output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
     generate_video_sequence(sequences[d], l, s, output)

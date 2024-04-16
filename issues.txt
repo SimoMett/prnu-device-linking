@@ -1,1 +1,2 @@
 - I dispositivi D40 e D02 (entrambi iPhoneX) hanno un dataset parziale
+- Il dispositivo iPadAir ha filmati con risoluzione ridotta (1270x720) rispetto alla standard 1920x1080. Fare stretching?

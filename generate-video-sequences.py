@@ -19,20 +19,37 @@ def extract_clip(input_file: str, output: str, start=0, duration=10):
     )
 
 
+# This function was a pain in the arse
+# I'll try to doc it
 def concatenate_videos(videos: list, output: str):
+    default_duration = 4
+
+    # For each video sources I have to trim the video and create a split filter using 'filter_multi_output'
+    # and then count every stream occurrence used during encoding process to avoid using the same stream multiple times
+    # (otherwise I'll get the error "ValueError: encountered trim with multiple outgoing edges...")
+    videos_set = set(videos)  # no duplicates
+    splits_map = dict.fromkeys(videos_set)
+    for v in splits_map.keys():
+        if v is not None:
+            splits_map[v] = ([ffmpeg.input(v).trim(start=0, end=default_duration).filter_multi_output("split"), 0])
+        else:
+            splits_map[v] = ([ffmpeg.input(videos[1]).trim(start=0, end=default_duration).filter_multi_output("split"), 0])  # FIXME
+
+    # Now I build the clips sequence allocating the streams of each sources
     clips = []
     for v in videos:
         if v is not None:
-            clips.append(ffmpeg.input(v).trim(start=0, end=4))
-    (
-        ffmpeg
-        .concat(*clips)
-        .output(output)
-        .run()
-    )
+            clips.append(splits_map[v][0].stream(splits_map[v][1]))
+            splits_map[v][1] += 1
+        else:
+            clips.append(splits_map[videos[1]][0].stream(splits_map[videos[1]][1]))
+            splits_map[videos[1]][1] += 1
+
+    # Finally, generate output
+    ffmpeg.concat(*clips).output(output).run()
 
 
-def generate_videos(sequence, i, j):
+def generate_video_sequence(sequence, i, j):
     assert i != 0 and j != 0
 
     print("Generating sequence:")
@@ -48,7 +65,7 @@ def get_video_path(device, l, s):
 
 
 def main():
-    generate_videos(sequence_a, 1, 2)
+    generate_video_sequence(sequence_a, 1, 2)
 
     return
 

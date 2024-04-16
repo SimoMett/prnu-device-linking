@@ -49,12 +49,12 @@ def concatenate_videos(videos: list, output: str):
     ffmpeg.concat(*clips).output(output).run()
 
 
-def generate_video_sequence(sequence, i, j):
+def generate_video_sequence(sequence, i, j, output):
     assert i != 0 and j != 0
 
     print("Generating sequence:")
     file_paths = [get_video_path(e, i, j)[0] if get_video_path(e, i, j) != [] else None for e in sequence]
-    concatenate_videos(file_paths, "test.mp4")
+    concatenate_videos(file_paths, output)
     return
 
 
@@ -65,7 +65,7 @@ def get_video_path(device, l, s):
 
 
 def main():
-    generate_video_sequence(sequence_a, 1, 2)
+    generate_video_sequence(sequence_a, 1, 2, "test.mp4")
 
     return
 

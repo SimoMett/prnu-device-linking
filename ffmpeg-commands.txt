@@ -1,0 +1,1 @@
+ffmpeg -i <input.mp4> -c copy -t 00:00:10.0 <output.mp4> # extract first 10 seconds clip

@@ -1,1 +1,2 @@
 ffmpeg -i <input.mp4> -c copy -t 00:00:10.0 <output.mp4> # extract first 10 seconds clip
+ffmpeg -i <input.mp4> -vf "select=eq(n\,34)" -vframes 1 <output.png> # extract the 35th frame (just change 34 with something else)

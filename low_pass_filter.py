@@ -29,11 +29,9 @@ def apply_lp_filter(img_array, cutoff):
     return img_array
 
 
-def apply_lp_filter_grayscale(img_array, cutoff_factor):
-    assert cutoff_factor < 1.0
+def apply_lp_filter_grayscale(img_array, cutoff):
     height, width = img_array.shape
 
-    cutoff = int(height*cutoff_factor)
     data_fft = np.fft.fftshift(np.fft.fft2(img_array))
     data_fft[:height, :(int(width/2) - cutoff)] = 1
     data_fft[:height, (int(width/2) + cutoff):] = 1

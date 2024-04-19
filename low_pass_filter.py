@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 def apply_lp_filter(img_array, cutoff):
     data_r = img_array[:, :, 0]
     data_r_fft = np.fft.fftshift(np.fft.fft2(data_r))
@@ -30,11 +29,15 @@ def apply_lp_filter(img_array, cutoff):
     return img_array
 
 
-def apply_lp_filter_grayscale(img_array, cutoff):
+def apply_lp_filter_grayscale(img_array, cutoff_factor):
+    assert cutoff_factor < 1.0
+    height, width = img_array.shape
+
+    cutoff = int(height*cutoff_factor)
     data_fft = np.fft.fftshift(np.fft.fft2(img_array))
-    data_fft[:1080, :(960 - cutoff)] = 1
-    data_fft[:1080, (960 + cutoff):] = 1
-    data_fft[:(540 - cutoff), :1920] = 1
-    data_fft[(540 + cutoff):, :1920] = 1
+    data_fft[:height, :(int(width/2) - cutoff)] = 1
+    data_fft[:height, (int(width/2) + cutoff):] = 1
+    data_fft[:(int(height/2) - cutoff), :width] = 1
+    data_fft[(int(height/2) + cutoff):, :width] = 1
 
     return abs(np.fft.ifft2(data_fft))

@@ -96,4 +96,4 @@ def debug_main():
 
 
 if __name__ == "__main__":
-    debug_main()
+    main()

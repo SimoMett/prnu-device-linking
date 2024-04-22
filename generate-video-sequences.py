@@ -26,24 +26,15 @@ def concatenate_videos(videos: list, output: str):
     videos_set = set(videos)  # no duplicates
     splits_map = dict.fromkeys(videos_set)
     for v in splits_map.keys():
-        if v is not None:
-            assert os.path.isfile(v)
-            splits_map[v] = (
-                [ffmpeg.input(v).trim(start=default_start, end=default_duration).filter_multi_output("split"), 0])
-        else:
-            splits_map[v] = (
-                [ffmpeg.input(videos[1]).trim(start=default_start, end=default_duration).filter_multi_output("split"),
-                 0])  # FIXME
+        assert os.path.isfile(v)
+        splits_map[v] = (
+            [ffmpeg.input(v).trim(start=default_start, end=default_duration).filter_multi_output("split"), 0])
 
     # Now I build the clips sequence allocating the streams of each sources
     clips = []
     for v in videos:
-        if v is not None:
-            clips.append(splits_map[v][0].stream(splits_map[v][1]))
-            splits_map[v][1] += 1
-        else:
-            clips.append(splits_map[videos[1]][0].stream(splits_map[videos[1]][1]))
-            splits_map[videos[1]][1] += 1
+        clips.append(splits_map[v][0].stream(splits_map[v][1]))
+        splits_map[v][1] += 1
 
     # Finally, stretch every clip to 1080p and generate output
     ffmpeg.concat(*[c.filter("scale", "1920-1080").filter("setsar", "1-1") for c in clips]).output(output).overwrite_output().run()
@@ -78,8 +69,10 @@ devices_pairs = [
     (38, 4)
 ]
 sequences = [
-    (2, 19, 2, 5, 2, 40, 2, 32, 2, 38),
-    (24, 34, 24, 33, 24, 39, 24, 17, 24, 4)
+    #(2, 19, 2, 5, 2, 40, 2, 32, 2, 38),
+    (13, 19, 13, 5, 13, 40, 13, 32, 13, 38),
+    #(24, 34, 24, 33, 24, 39, 24, 17, 24, 4)
+    (35, 34, 35, 33, 35, 39, 35, 17, 35, 4)
     # A   G   A   H   A   M  A   S   A   X
 ]
 
@@ -95,12 +88,12 @@ def main():
 
 
 def debug_main():
-    l = 5
-    s = 5
+    l = 1
+    s = 1
     d = 1
     output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
     generate_video_sequence(sequences[d], l, s, output)
 
 
 if __name__ == "__main__":
-    main()
+    debug_main()

@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import scipy.signal
 from matplotlib import pyplot as plt
 import low_pass_filter
 
@@ -45,7 +46,7 @@ def stability_measure(frame1, frame2, lpf_cutoff=16):
     return np.linalg.norm((filtered_frame1 - filtered_frame2) ** 2)
 
 
-def find_peaks(values, threshold): # FIXME not always working
+def find_peaks(values, threshold):  # FIXME not always working
     peaks = []
     for i in range(len(values)):
         if values[i] > threshold:
@@ -54,7 +55,7 @@ def find_peaks(values, threshold): # FIXME not always working
 
 
 def main():
-    lp_cutoff = 0  # using 16 for 1080p frames. This parameter has to be adjusted for other resolutions
+    lp_cutoff = 8  # using 16 for 1080p frames. This parameter has to be adjusted for other resolutions
     # using 0 for no LP filter
 
     frames = pick_frames(cv2.VideoCapture("output/Seq1_Clip_L05S04.mp4"), 3)
@@ -63,8 +64,9 @@ def main():
         values.append(stability_measure(frames[i], frames[i + 1], lp_cutoff))
     plt.subplot(2, 1, 1)
     plt.title("Seq1_Clip_L05S04.mp4")
-    plt.plot([i for i in range(len(values))], values, color="blue")
-    print(find_peaks(values, np.std(values)*3))
+    plt.plot([i for i in range(len(values))], np.log(values), color="blue")
+    # print(find_peaks(values, np.std(values) * 3))
+    # print(scipy.signal.find_peaks(np.log(values), prominence=1))
     plt.grid()
 
     plt.show()

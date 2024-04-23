@@ -18,7 +18,7 @@ def extract_clip(input_file: str, output: str, start=0, duration=10):
 # I'll try to doc it
 def concatenate_videos(videos: list, output: str):
     default_start = 0
-    default_duration = 1
+    default_duration = 10
 
     # For each video sources I have to trim the video and create a split filter using 'filter_multi_output'
     # and then count every stream occurrence used during encoding process to avoid using the same stream multiple times

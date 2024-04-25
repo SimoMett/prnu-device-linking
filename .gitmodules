@@ -1,0 +1,3 @@
+[submodule "prnu-python"]
+	path = prnu-python
+	url = https://github.com/polimi-ispl/prnu-python.git

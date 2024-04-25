@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-import scipy.signal
+# import scipy.signal
 from matplotlib import pyplot as plt
 import low_pass_filter
 
@@ -14,14 +14,6 @@ def plot(data, title):
 
 
 plot.i = 0
-
-
-def extract_frame(video_file, frame_number):
-    mp4file = cv2.VideoCapture(video_file)
-
-    mp4file.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
-    res, frame = mp4file.read()
-    return res, cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).astype(int)
 
 
 def pick_frames(video: cv2.VideoCapture, interval):

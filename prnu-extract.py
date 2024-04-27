@@ -10,10 +10,10 @@ from params import sequences
 def main():
     seq = sequences[0]
     # removing duplicates and keeping same order
-    x = []
-    for i in seq:
-        if i not in x:
-            x.append(i)
+    # x = []
+    # for i in seq:
+    #     if i not in x:
+    #         x.append(i)
     # ground_truth = prnu.gt(x, seq)
     ground_truth = prnu.gt(seq, seq)
 
@@ -30,6 +30,11 @@ def main():
         residuals.append(prnu.extract_single(img_array))
 
     aligned_ncc = prnu.aligned_cc(residuals, residuals)['ncc']
+    # In this case aligned_ncc is a triangular matrix. FIXME possible optimization?
+    stats_cc = prnu.stats(aligned_ncc, ground_truth)
+    # print("false-positive rate:", stats_cc['fpr']) # TODO plot?
+    # print("true-positive rate:", stats_cc['tpr']) # TODO plot?
+    print("area under curve (auc):", "{:0.3f}".format(stats_cc['auc']))
     return
 
 

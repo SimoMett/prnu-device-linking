@@ -1,6 +1,7 @@
 import ffmpeg
 import glob
 import os
+from params import *
 
 
 # extract clip WITHOUT audio, but for the purpose of this project it's fine
@@ -37,11 +38,12 @@ def concatenate_videos(videos: list, output: str):
         splits_map[v][1] += 1
 
     # Finally, stretch every clip to 1080p and generate output
-    ffmpeg.concat(*[c.filter("scale", "1920-1080").filter("setsar", "1-1") for c in clips]).output(output).overwrite_output().run()
+    ffmpeg.concat(*[c.filter("scale", "1920-1080").filter("setsar", "1-1") for c in clips]).output(
+        output).overwrite_output().run()
 
 
 def generate_video_sequence(sequence, l, s, output: str):
-    print("Generating", output+":")
+    print("Generating", output + ":")
     assert l != 0 and s != 0
 
     file_paths = [get_video_path(e, l, s)[0] if get_video_path(e, l, s) != [] else None for e in sequence]
@@ -52,29 +54,10 @@ def generate_video_sequence(sequence, l, s, output: str):
 def get_video_path(device, l, s):
     result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mp4")
     if not result:
-        result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.MOV")
+        result = glob.glob(
+            "Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.MOV")
     # assert len(result) == 1
     return result
-
-
-locations_cnt = 7
-scenes_cnt = 4  # used to be 6, but dataset is lacking
-brand_devices_cnt = 2
-devices_pairs = [
-    (2, 24),
-    (19, 34),
-    (5, 33),
-    (40, 39),
-    (32, 17),
-    (38, 4)
-]
-sequences = [
-    #(2, 19, 2, 5, 2, 40, 2, 32, 2, 38),
-    (13, 19, 13, 5, 13, 40, 13, 32, 13, 38),
-    #(24, 34, 24, 33, 24, 39, 24, 17, 24, 4)
-    (35, 34, 35, 33, 35, 39, 35, 17, 35, 4)
-    # A   G   A   H   A   M  A   S   A   X
-]
 
 
 def main():
@@ -85,14 +68,6 @@ def main():
                 output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
                 generate_video_sequence(sequences[d], l, s, output)
     return
-
-
-def debug_main():
-    l = 1
-    s = 1
-    d = 1
-    output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
-    generate_video_sequence(sequences[d], l, s, output)
 
 
 if __name__ == "__main__":

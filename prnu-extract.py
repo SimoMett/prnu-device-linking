@@ -4,9 +4,19 @@ import numpy as np
 from PIL import Image
 
 import prnu
+from params import sequences
 
 
 def main():
+    seq = sequences[0]
+    # removing duplicates and keeping same order
+    x = []
+    for i in seq:
+        if i not in x:
+            x.append(i)
+    # ground_truth = prnu.gt(x, seq)
+    ground_truth = prnu.gt(seq, seq)
+
     base_dir = sys.argv[1]
     assert os.path.isdir(base_dir)
 

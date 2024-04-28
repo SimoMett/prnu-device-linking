@@ -12,8 +12,7 @@ from matplotlib import pyplot as plt
 
 def main():
     base_dir = sys.argv[1]
-    seq_idx = re.match("\S+(?P<seq_id>[-+]?\d+)_Clip_L", base_dir)
-    seq_idx = int(seq_idx["seq_id"]) - 1
+    seq_idx = int(re.search(r'\d+', base_dir).group()) - 1
     seq = sequences[seq_idx]
     # removing duplicates and keeping same order
     # x = []

@@ -6,12 +6,15 @@ from PIL import Image
 
 import prnu
 from params import sequences
-
+import re
 from matplotlib import pyplot as plt
 
 
 def main():
-    seq = sequences[0]
+    base_dir = sys.argv[1]
+    seq_idx = re.match("\S+(?P<seq_id>[-+]?\d+)_Clip_L", base_dir)
+    seq_idx = int(seq_idx["seq_id"]) - 1
+    seq = sequences[seq_idx]
     # removing duplicates and keeping same order
     # x = []
     # for i in seq:
@@ -20,7 +23,6 @@ def main():
     # ground_truth = prnu.gt(x, seq)
     ground_truth = prnu.gt(seq, seq)
 
-    base_dir = sys.argv[1]
     assert os.path.isdir(base_dir)
 
     images = sorted(os.listdir(base_dir), key=lambda i: int(i.removeprefix("frame").removesuffix(".png")))
@@ -30,6 +32,7 @@ def main():
         assert ".png" in img
     if base_dir[-1] != '/':
         base_dir = base_dir + "/"
+
     ###
 
     def extract_func(png_path, resids, idx):

@@ -22,14 +22,19 @@ def main():
 
     images = sorted(os.listdir(base_dir), key=lambda i: int(i.removeprefix("frame").removesuffix(".png")))
     residuals = []
+    # error mitigation
     for img in images:
         assert ".png" in img
+    if base_dir[-1] != '/':
+        base_dir = base_dir + "/"
+    ###
+    # TODO multithreading?
     for img in images:
-        im = Image.open(base_dir+img)
+        im = Image.open(base_dir + img)
         img_array = np.array(im)
         residuals.append(prnu.extract_single(img_array))
 
-    aligned_ncc = prnu.aligned_cc(residuals, residuals)['ncc']
+    aligned_ncc = prnu.aligned_cc(np.array(residuals), np.array(residuals))['ncc']
     # In this case aligned_ncc is a triangular matrix. FIXME possible optimization?
     stats_cc = prnu.stats(aligned_ncc, ground_truth)
     # print("false-positive rate:", stats_cc['fpr']) # TODO plot?

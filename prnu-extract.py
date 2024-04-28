@@ -1,5 +1,6 @@
 import sys
 import os
+import threading
 import numpy as np
 from PIL import Image
 
@@ -21,18 +22,28 @@ def main():
     assert os.path.isdir(base_dir)
 
     images = sorted(os.listdir(base_dir), key=lambda i: int(i.removeprefix("frame").removesuffix(".png")))
-    residuals = []
+
     # error mitigation
     for img in images:
         assert ".png" in img
     if base_dir[-1] != '/':
         base_dir = base_dir + "/"
     ###
-    # TODO multithreading?
-    for img in images:
-        im = Image.open(base_dir + img)
+
+    def extract_func(png_path, resids, idx):
+        im = Image.open(png_path)
         img_array = np.array(im)
-        residuals.append(prnu.extract_single(img_array))
+        resids[idx] = prnu.extract_single(img_array)
+
+    residuals = [None for _ in images]
+    threads = []
+    for img in images:
+        thr = threading.Thread(target=extract_func, args=(base_dir + img, residuals, images.index(img)))
+        thr.start()
+        threads.append(thr)
+
+    for t in threads:
+        t.join()
 
     aligned_ncc = prnu.aligned_cc(np.array(residuals), np.array(residuals))['ncc']
     # In this case aligned_ncc is a triangular matrix. FIXME possible optimization?

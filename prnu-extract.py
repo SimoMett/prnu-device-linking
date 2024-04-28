@@ -10,8 +10,7 @@ import re
 from matplotlib import pyplot as plt
 
 
-def main():
-    base_dir = sys.argv[1]
+def main(base_dir):
     seq_idx = int(re.search(r'\d+', base_dir).group()) - 1
     seq = sequences[seq_idx]
     # removing duplicates and keeping same order
@@ -23,7 +22,6 @@ def main():
     ground_truth = prnu.gt(seq, seq)
 
     assert os.path.isdir(base_dir)
-
     images = sorted(os.listdir(base_dir), key=lambda i: int(i.removeprefix("frame").removesuffix(".png")))
 
     # error mitigation
@@ -31,7 +29,6 @@ def main():
         assert ".png" in img
     if base_dir[-1] != '/':
         base_dir = base_dir + "/"
-
     ###
 
     def extract_func(png_path, resids, idx):
@@ -52,7 +49,7 @@ def main():
     aligned_ncc = prnu.aligned_cc(np.array(residuals), np.array(residuals))['ncc']
     # In this case aligned_ncc is a triangular matrix. FIXME possible optimization?
     stats_cc = prnu.stats(aligned_ncc, ground_truth)
-    plot = True
+    plot = False
     if plot:
         plt.title(base_dir)
         fpr = stats_cc['fpr']
@@ -63,10 +60,12 @@ def main():
         plt.grid()
         plt.legend()
         plt.show()
+        # plt.savefig("test.svg")
     else:
-        print("area under curve (auc):", "{:0.3f}".format(stats_cc['auc']))
+        print(base_dir+" - area under curve (auc):", "{:0.3f}".format(stats_cc['auc']))
     return
 
 
 if __name__ == "__main__":
-    main()
+    for i in range(1, len(sys.argv)):
+        main(sys.argv[i])

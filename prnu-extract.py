@@ -7,6 +7,8 @@ from PIL import Image
 import prnu
 from params import sequences
 
+from matplotlib import pyplot as plt
+
 
 def main():
     seq = sequences[0]
@@ -48,9 +50,19 @@ def main():
     aligned_ncc = prnu.aligned_cc(np.array(residuals), np.array(residuals))['ncc']
     # In this case aligned_ncc is a triangular matrix. FIXME possible optimization?
     stats_cc = prnu.stats(aligned_ncc, ground_truth)
-    # print("false-positive rate:", stats_cc['fpr']) # TODO plot?
-    # print("true-positive rate:", stats_cc['tpr']) # TODO plot?
-    print("area under curve (auc):", "{:0.3f}".format(stats_cc['auc']))
+    plot = True
+    if plot:
+        plt.title(base_dir)
+        fpr = stats_cc['fpr']
+        tpr = stats_cc['tpr']
+        plt.plot([i for i in range(len(fpr))], fpr, label="FPR")
+        plt.plot([i for i in range(len(tpr))], tpr, label="TPR")
+        plt.plot([], [], ' ', label="AUC: {:0.3f}".format(stats_cc['auc']))
+        plt.grid()
+        plt.legend()
+        plt.show()
+    else:
+        print("area under curve (auc):", "{:0.3f}".format(stats_cc['auc']))
     return
 
 

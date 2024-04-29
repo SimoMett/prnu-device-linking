@@ -10,6 +10,14 @@ import re
 from matplotlib import pyplot as plt
 
 
+def get_and_save_aligned_ncc(_residuals, output_path):
+    aligned_ncc = prnu.aligned_cc(np.array(_residuals), np.array(_residuals))['ncc']
+    with open(output_path+"aligned_ncc.csv", "w") as output_file:
+        for row in aligned_ncc:
+            output_file.write(",".join((str(i) for i in row))+"\n")
+    return aligned_ncc
+
+
 def main(base_dir):
     seq_idx = int(re.search(r'\d+', base_dir).group()) - 1
     seq = sequences[seq_idx]
@@ -22,7 +30,8 @@ def main(base_dir):
     ground_truth = prnu.gt(seq, seq)
 
     assert os.path.isdir(base_dir)
-    images = sorted(os.listdir(base_dir), key=lambda i: int(i.removeprefix("frame").removesuffix(".png")))
+    pngs = list(filter(lambda p: ".png" in p, os.listdir(base_dir)))
+    images = sorted(pngs, key=lambda i: int(i.removeprefix("frame").removesuffix(".png")))
 
     # error mitigation
     for img in images:
@@ -46,7 +55,7 @@ def main(base_dir):
     for t in threads:
         t.join()
 
-    aligned_ncc = prnu.aligned_cc(np.array(residuals), np.array(residuals))['ncc']
+    aligned_ncc = get_and_save_aligned_ncc(residuals, base_dir)
     # In this case aligned_ncc is a triangular matrix. FIXME possible optimization?
     stats_cc = prnu.stats(aligned_ncc, ground_truth)
     plot = False
@@ -62,7 +71,7 @@ def main(base_dir):
         plt.show()
         # plt.savefig("test.svg")
     else:
-        print(base_dir+" - area under curve (auc):", "{:0.3f}".format(stats_cc['auc']))
+        print(base_dir + " - area under curve (auc):", "{:0.3f}".format(stats_cc['auc']))
     return
 
 

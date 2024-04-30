@@ -40,22 +40,23 @@ def main(base_dir):
         base_dir = base_dir + "/"
     ###
 
+    # normalized cross-correlation (NCC)
     def extract_func(png_path, resids, idx):
         im = Image.open(png_path)
         img_array = np.array(im)
         resids[idx] = prnu.extract_single(img_array)
 
-    residuals = [None for _ in images]
+    w = [None for _ in images]
     threads = []
-    for img in images:
-        thr = threading.Thread(target=extract_func, args=(base_dir + img, residuals, images.index(img)))
+    for i, img in enumerate(images):
+        thr = threading.Thread(target=extract_func, args=(base_dir + img, w, i))
         thr.start()
         threads.append(thr)
 
     for t in threads:
         t.join()
 
-    aligned_ncc = get_and_save_aligned_ncc(residuals, base_dir)
+    aligned_ncc = get_and_save_aligned_ncc(w, base_dir)
     # In this case aligned_ncc is a triangular matrix. FIXME possible optimization?
     stats_cc = prnu.stats(aligned_ncc, ground_truth)
     plot = False
@@ -72,6 +73,13 @@ def main(base_dir):
         # plt.savefig("test.svg")
     else:
         print(base_dir + " - area under curve (auc):", "{:0.3f}".format(stats_cc['auc']))
+
+    # peak to correlation energy (PCE)
+    pce_mat = np.zeros((len(w), len(w)))
+    for i, w1 in enumerate(w):
+        for j, w2 in enumerate(w):
+            cc2d = prnu.crosscorr_2d(w1, w2)
+            pce_mat[i, j] = prnu.pce(cc2d)['pce']
     return
 
 

@@ -1,3 +1,5 @@
+import sys
+
 import ffmpeg
 import glob
 import os
@@ -71,4 +73,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 4:
+        d = int(sys.argv[1])
+        l = int(sys.argv[2])
+        s = int(sys.argv[3])
+        output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
+        generate_video_sequence(sequences[d], l, s, output)
+    else:
+        main()

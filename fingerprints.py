@@ -9,7 +9,7 @@ def main(video_path):
     fps = int(mp4file.get(cv2.CAP_PROP_FPS))
     print("Fps:", fps)
     frames = extract_frames(mp4file, [i for i in range(1, fps*8, 2)])
-    # k = prnu.extract_multiple_aligned(frames)
+    k = prnu.extract_multiple_aligned(frames)
     print(len(frames))
     return
 

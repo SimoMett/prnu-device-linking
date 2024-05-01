@@ -34,7 +34,8 @@ def main(video_path):
     for i, f in enumerate(k_frames):
         clips_fingerprints_k.append(prnu.extract_multiple_aligned(f))
 
-    # extract residuals from samples
+    # normalized cross-correlation (NCC)
+    #  extract residuals from samples
     samples = extract_frames(mp4file, seq)
     residuals_w = [None for _ in samples]
 
@@ -51,7 +52,19 @@ def main(video_path):
 
     # aligned_ncc = get_and_save_aligned_ncc(w, base_dir)
     aligned_ncc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['ncc']
-    stats_cc = prnu.stats(aligned_ncc, ground_truth)
+    stats_ncc = prnu.stats(aligned_ncc, ground_truth)
+
+    # peak to correlation energy (PCE)
+    pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
+
+    for i, fp_k in enumerate(clips_fingerprints_k):
+        for j, res_w in enumerate(residuals_w):
+            cc2d = prnu.crosscorr_2d(fp_k, res_w)
+            pce_rot[i, j] = prnu.pce(cc2d)['pce']
+
+    stats_pce = prnu.stats(pce_rot, ground_truth)
+    print("stats_ncc auc:", stats_ncc['auc'])
+    print("stats_pce auc:", stats_pce['auc'])
     return
 
 

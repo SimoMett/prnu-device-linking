@@ -58,10 +58,18 @@ def main(video_path):
     # peak to correlation energy (PCE)
     pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
 
+    def extract_pce_func(k1, k2, dest_array, i, j):
+        cc2d = prnu.crosscorr_2d(k1, k2)
+        dest_array[i, j] = prnu.pce(cc2d)['pce']
+
+    threads = []
     for i, fp_k in enumerate(clips_fingerprints_k):
         for j, res_w in enumerate(residuals_w):
-            cc2d = prnu.crosscorr_2d(fp_k, res_w)
-            pce_rot[i, j] = prnu.pce(cc2d)['pce']
+            thr = threading.Thread(target=extract_pce_func, args=(fp_k, res_w, pce_rot, i, j))
+            thr.start()
+            threads.append(thr)
+    for t in threads:
+        t.join()
 
     stats_pce = prnu.stats(pce_rot, ground_truth)
     print("stats_ncc auc:", stats_ncc['auc'])

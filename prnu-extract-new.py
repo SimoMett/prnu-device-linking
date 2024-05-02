@@ -11,6 +11,7 @@ from extract_frames import sequence_from_groundtruth, extract_frames
 
 
 def main(video_path):
+    print(video_path)
     mp4file = cv2.VideoCapture(video_path)
     seq = sequence_from_groundtruth(mp4file)
 

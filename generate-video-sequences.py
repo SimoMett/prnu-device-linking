@@ -44,15 +44,6 @@ def concatenate_videos(videos: list, output: str):
         output).overwrite_output().run()
 
 
-def generate_video_sequence(sequence, l, s, output: str):
-    print("Generating", output + ":")
-    assert l != 0 and s != 0
-
-    file_paths = [get_video_path(e, l, s)[0] if get_video_path(e, l, s) != [] else None for e in sequence]
-    concatenate_videos(file_paths, output)
-    return
-
-
 def get_video_path(device, l, s):
     result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mp4")
     if not result:
@@ -62,8 +53,19 @@ def get_video_path(device, l, s):
     return result
 
 
+def generate_video_sequence(sequence, l, s, output: str):
+    print("Generating", output + ":")
+    assert l != 0 and s != 0
+
+    file_paths = [get_video_path(e, l, s)[0] if get_video_path(e, l, s) != [] else None for e in sequence]
+    if None in file_paths:
+        print("Skipping. Missing file")
+        return
+    concatenate_videos(file_paths, output)
+    return
+
+
 def main():
-    os.makedirs("output", exist_ok=True)
     for d in range(brand_devices_cnt):
         for l in range(1, locations_cnt + 1):
             for s in range(1, scenes_cnt + 1):
@@ -73,6 +75,7 @@ def main():
 
 
 if __name__ == "__main__":
+    os.makedirs("output", exist_ok=True)
     if len(sys.argv) == 4:
         d = int(sys.argv[1])
         l = int(sys.argv[2])

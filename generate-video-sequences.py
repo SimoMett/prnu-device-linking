@@ -77,7 +77,7 @@ def generate_video_sequence(sequence, l, s, output: str):
 def main():
     for d in range(brand_devices_cnt):
         for l in range(1, locations_cnt + 1):
-            for s in range(1, scenes_cnt + 1):
+            for s in range(1, samples_cnt + 1):
                 output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
                 generate_video_sequence(sequences[d], l, s, output)
     return

@@ -1,5 +1,5 @@
 locations_cnt = 7
-scenes_cnt = 4  # used to be 6, but dataset is lacking
+samples_cnt = 6  # Warning: not every device has 6 samples. I'll try my best during generation
 brand_devices_cnt = 2
 devices_pairs = [
     (13, 35),

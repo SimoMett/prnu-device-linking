@@ -40,8 +40,14 @@ def concatenate_videos(videos: list, output: str):
         splits_map[v][1] += 1
 
     # Finally, stretch every clip to 1080p and generate output
-    ffmpeg.concat(*[c.filter("scale", "1920-1080").filter("setsar", "1-1") for c in clips]).output(
-        output).overwrite_output().run()
+    partial_output = output.replace(".mp4", ".partial.mp4")
+    (
+        ffmpeg.concat(*[c.filter("scale", "1920-1080").filter("setsar", "1-1") for c in clips])
+        .output(partial_output)
+        .overwrite_output()
+        .run()
+    )
+    os.rename(partial_output, output)
 
 
 def get_video_path(device, l, s):
@@ -60,6 +66,9 @@ def generate_video_sequence(sequence, l, s, output: str):
     file_paths = [get_video_path(e, l, s)[0] if get_video_path(e, l, s) != [] else None for e in sequence]
     if None in file_paths:
         print("Skipping. Missing file")
+        return
+    if os.path.isfile(output):
+        print("Skipping. Valid", output, "already exists")
         return
     concatenate_videos(file_paths, output)
     return

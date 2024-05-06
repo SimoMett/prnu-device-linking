@@ -1,13 +1,54 @@
 import re
 import sys
+import os
 import threading
 
 import cv2
 import numpy as np
-
+import pickle as pk
 import params
 import prnu
 from extract_frames import sequence_from_groundtruth, extract_frames
+
+
+def save_as_pickle(filename: str, object):
+    output_file = open(filename, "wb")
+    pk.dump(object, output_file)
+    output_file.close()
+    print("Generated", filename)
+    return
+
+
+def save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce):
+    output_path = video_path.replace(".mp4", "/")
+    os.makedirs(output_path, exist_ok=True)
+
+    with open(output_path + "aligned_cc.csv", "w") as output_file:
+        for row in aligned_cc:
+            output_file.write(",".join((str(i) for i in row)) + "\n")
+
+    with open(output_path + "pce.csv", "w") as output_file:
+        for row in pce_rot:
+            output_file.write(",".join((str(i) for i in row)) + "\n")
+
+    with open(output_path + "stats_cc.csv", "w") as output_file:
+        output_file.write("TPR:," + ",".join((str(i) for i in stats_cc['tpr'])) + "\n")
+        output_file.write("FPR:," + ",".join((str(i) for i in stats_cc['fpr'])) + "\n")
+        output_file.write("TH:," + ",".join((str(i) for i in stats_cc['th'])) + "\n")
+        output_file.write("AUC:," + str(stats_cc['auc']) + "\n")
+        output_file.write("EER:," + str(stats_cc['eer']) + "\n")
+
+    with open(output_path + "stats_pce.csv", "w") as output_file:
+        output_file.write("TPR:,"+",".join((str(i) for i in stats_pce['tpr'])) + "\n")
+        output_file.write("FPR:,"+",".join((str(i) for i in stats_pce['fpr'])) + "\n")
+        output_file.write("TH:,"+",".join((str(i) for i in stats_pce['th'])) + "\n")
+        output_file.write("AUC:," + str(stats_pce['auc']) + "\n")
+        output_file.write("EER:," + str(stats_pce['eer']) + "\n")
+
+    save_as_pickle(output_path+"full_results.pickle", (aligned_cc, stats_cc, pce_rot, stats_pce))
+
+    print("stats_cc auc:", stats_cc['auc'])
+    print("stats_pce auc:", stats_pce['auc'])
 
 
 def main(video_path):
@@ -35,7 +76,7 @@ def main(video_path):
     for i, f in enumerate(k_frames):
         clips_fingerprints_k.append(prnu.extract_multiple_aligned(f))
 
-    # normalized cross-correlation (NCC)
+    # cross-correlation (CC)
     #  extract residuals from samples
     samples = extract_frames(mp4file, seq)
     residuals_w = [None for _ in samples]
@@ -51,9 +92,8 @@ def main(video_path):
     for t in threads:
         t.join()
 
-    # aligned_ncc = get_and_save_aligned_ncc(w, base_dir)
-    aligned_ncc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['ncc']
-    stats_ncc = prnu.stats(aligned_ncc, ground_truth)
+    aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']
+    stats_cc = prnu.stats(aligned_cc, ground_truth)
 
     # peak to correlation energy (PCE)
     pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
@@ -72,8 +112,7 @@ def main(video_path):
         t.join()
 
     stats_pce = prnu.stats(pce_rot, ground_truth)
-    print("stats_ncc auc:", stats_ncc['auc'])
-    print("stats_pce auc:", stats_pce['auc'])
+    save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce)
     return
 
 

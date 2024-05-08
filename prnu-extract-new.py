@@ -47,11 +47,11 @@ def save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce):
 
     save_as_pickle(output_path+"full_results.pickle", (aligned_cc, stats_cc, pce_rot, stats_pce))
 
-    print("stats_cc auc:", stats_cc['auc'])
-    print("stats_pce auc:", stats_pce['auc'])
-
 
 def main(video_path):
+    if os.path.isdir(video_path.replace(".mp4", "/")):
+        print("Skipping",video_path+". Results already exist.")
+        return
     print(video_path)
     mp4file = cv2.VideoCapture(video_path)
     seq = sequence_from_groundtruth(mp4file)

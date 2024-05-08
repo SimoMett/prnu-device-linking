@@ -1,7 +1,6 @@
 import re
 import sys
 import os
-import threading
 from multiprocessing import Pool
 
 import cv2
@@ -39,18 +38,22 @@ def save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce):
         output_file.write("EER:," + str(stats_cc['eer']) + "\n")
 
     with open(output_path + "stats_pce.csv", "w") as output_file:
-        output_file.write("TPR:,"+",".join((str(i) for i in stats_pce['tpr'])) + "\n")
-        output_file.write("FPR:,"+",".join((str(i) for i in stats_pce['fpr'])) + "\n")
-        output_file.write("TH:,"+",".join((str(i) for i in stats_pce['th'])) + "\n")
+        output_file.write("TPR:," + ",".join((str(i) for i in stats_pce['tpr'])) + "\n")
+        output_file.write("FPR:," + ",".join((str(i) for i in stats_pce['fpr'])) + "\n")
+        output_file.write("TH:," + ",".join((str(i) for i in stats_pce['th'])) + "\n")
         output_file.write("AUC:," + str(stats_pce['auc']) + "\n")
         output_file.write("EER:," + str(stats_pce['eer']) + "\n")
 
-    save_as_pickle(output_path+"full_results.pickle", (aligned_cc, stats_cc, pce_rot, stats_pce))
+    save_as_pickle(output_path + "full_results.pickle", (aligned_cc, stats_cc, pce_rot, stats_pce))
+
+
+def pce_rot_func(_fp_k, _res_w):
+    return prnu.pce(prnu.crosscorr_2d(_fp_k, _res_w))['pce']
 
 
 def procedure(video_path: str):
     if os.path.isdir(video_path.replace(".mp4", "/")):
-        print("Skipping",video_path+". Results already exist.")
+        print("Skipping", video_path + ". Results already exist.")
         return
 
     mp4file = cv2.VideoCapture(video_path)
@@ -90,22 +93,23 @@ def procedure(video_path: str):
 
     # peak to correlation energy (PCE)
     pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
+    pp = [[None for i in range(len(clips_fingerprints_k))] for j in range(len(residuals_w))]
+    pool = Pool(os.cpu_count())
 
     for i, fp_k in enumerate(clips_fingerprints_k):
         for j, res_w in enumerate(residuals_w):
-            cc2d = prnu.crosscorr_2d(fp_k, res_w)
-            pce_rot[i, j] = prnu.pce(cc2d)['pce']
+            pp[i][j] = pool.apply_async(pce_rot_func, (fp_k, res_w,))
 
+    for i, fp_k in enumerate(clips_fingerprints_k):
+        for j, res_w in enumerate(residuals_w):
+            pce_rot[i, j] = pp[i][j].get()
+
+    pool.close()
     stats_pce = prnu.stats(pce_rot, ground_truth)
     save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce)
     return
 
 
 if __name__ == "__main__":
-    processes = 2
-    args = sys.argv[1::]
-    for i in range((len(args) + processes - 1) // processes):
-        files = args[i * processes:(i + 1) * processes]
-        threads = [threading.Thread(target=procedure, args=(f,)) for f in files]
-        [t.start() for t in threads]
-        [t.join() for t in threads]
+    for s in sys.argv[1::]:
+        procedure(s)

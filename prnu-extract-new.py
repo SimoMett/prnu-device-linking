@@ -48,12 +48,15 @@ def save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce):
     save_as_pickle(output_path+"full_results.pickle", (aligned_cc, stats_cc, pce_rot, stats_pce))
 
 
-def main(video_path):
+def procedure(video_path: str):
     if os.path.isdir(video_path.replace(".mp4", "/")):
         print("Skipping",video_path+". Results already exist.")
         return
-    print(video_path)
+
     mp4file = cv2.VideoCapture(video_path)
+    fps = int(mp4file.get(cv2.CAP_PROP_FPS))
+    tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
+    print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
     seq = sequence_from_groundtruth(mp4file)
 
     # ground truth
@@ -99,10 +102,10 @@ def main(video_path):
 
 
 if __name__ == "__main__":
-    cpu = os.cpu_count()//2
+    processes = 2
     args = sys.argv[1::]
-    for i in range((len(args) + cpu - 1) // cpu):
-        files = args[i * cpu:(i + 1) * cpu]
-        threads = [threading.Thread(target=main, args=(f)) for f in files]
+    for i in range((len(args) + processes - 1) // processes):
+        files = args[i * processes:(i + 1) * processes]
+        threads = [threading.Thread(target=procedure, args=(f,)) for f in files]
         [t.start() for t in threads]
         [t.join() for t in threads]

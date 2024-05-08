@@ -17,10 +17,7 @@ def sequence_from_groundtruth(video_capture):
     # The ground truth is: every 10 seconds there's a clip change
     seconds_between_clips = 10
     fps = int(video_capture.get(cv2.CAP_PROP_FPS))
-    print("Fps:", fps)
-
     tot_frames = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    print("Frames count", tot_frames)
 
     # This offset is needed because all the videos have 3009 frames
     #  which is weird because every video should be 100 seconds long at 30fps, i.e. 3000 frames long.

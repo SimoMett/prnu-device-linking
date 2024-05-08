@@ -12,9 +12,8 @@ from extract_frames import sequence_from_groundtruth, extract_frames
 
 
 def save_as_pickle(filename: str, object):
-    output_file = open(filename, "wb")
-    pk.dump(object, output_file)
-    output_file.close()
+    with open(filename, "wb") as output_file:
+        pk.dump(object, output_file)
     print("Generated", filename)
     return
 
@@ -98,16 +97,16 @@ def main(video_path):
     # peak to correlation energy (PCE)
     pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
 
-    def extract_pce_func(k1, k2, dest_array, i, j):
-        cc2d = prnu.crosscorr_2d(k1, k2)
-        dest_array[i, j] = prnu.pce(cc2d)['pce']
+    def extract_pce_func(k1, resids_w, dest_array, i):
+        for j, k2 in enumerate(resids_w):
+            cc2d = prnu.crosscorr_2d(k1, k2)
+            dest_array[i, j] = prnu.pce(cc2d)['pce']
 
     threads = []
     for i, fp_k in enumerate(clips_fingerprints_k):
-        for j, res_w in enumerate(residuals_w):
-            thr = threading.Thread(target=extract_pce_func, args=(fp_k, res_w, pce_rot, i, j))
-            thr.start()
-            threads.append(thr)
+        thr = threading.Thread(target=extract_pce_func, args=(fp_k, residuals_w, pce_rot, i))
+        thr.start()
+        threads.append(thr)
     for t in threads:
         t.join()
 

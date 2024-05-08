@@ -2,6 +2,7 @@ import re
 import sys
 import os
 import threading
+from multiprocessing import Pool
 
 import cv2
 import numpy as np
@@ -78,19 +79,9 @@ def main(video_path):
     # cross-correlation (CC)
     #  extract residuals from samples
     samples = extract_frames(mp4file, seq)
-    residuals_w = [None for _ in samples]
-
-    def extract_func(img_array, dest_array, idx):
-        dest_array[idx] = prnu.extract_single(img_array)
-
-    threads = []
-    for i, img in enumerate(samples):
-        thr = threading.Thread(target=extract_func, args=(img, residuals_w, i))
-        thr.start()
-        threads.append(thr)
-    for t in threads:
-        t.join()
-
+    pool = Pool(os.cpu_count())
+    residuals_w = pool.map(prnu.extract_single, samples)
+    pool.close()
     aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']
     stats_cc = prnu.stats(aligned_cc, ground_truth)
 
@@ -103,6 +94,7 @@ def main(video_path):
             dest_array[i, j] = prnu.pce(cc2d)['pce']
 
     threads = []
+    # FIXME ugly AF. Number of threads depend on size of clips_fingerprints_k
     for i, fp_k in enumerate(clips_fingerprints_k):
         thr = threading.Thread(target=extract_pce_func, args=(fp_k, residuals_w, pce_rot, i))
         thr.start()

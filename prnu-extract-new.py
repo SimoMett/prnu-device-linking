@@ -85,7 +85,7 @@ def procedure(video_path: str):
     # cross-correlation (CC)
     #  extract residuals from samples
     samples = extract_frames(mp4file, seq)
-    pool = Pool(os.cpu_count())
+    pool = Pool(os.cpu_count()-1 if os.cpu_count() != 1 else 1)
     residuals_w = pool.map(prnu.extract_single, samples)
     pool.close()
     aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']
@@ -94,7 +94,7 @@ def procedure(video_path: str):
     # peak to correlation energy (PCE)
     pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
     pp = [[None for i in range(len(clips_fingerprints_k))] for j in range(len(residuals_w))]
-    pool = Pool(os.cpu_count())
+    pool = Pool(os.cpu_count()-1 if os.cpu_count() != 1 else 1)
 
     for i, fp_k in enumerate(clips_fingerprints_k):
         for j, res_w in enumerate(residuals_w):

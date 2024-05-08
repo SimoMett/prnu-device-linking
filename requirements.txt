@@ -1,37 +1,12 @@
-Brotli @ file:///work/ci_py311/brotli-split_1676830125088/work
-certifi @ file:///croot/certifi_1707229174982/work/certifi
-charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
-contourpy @ file:///croot/contourpy_1700583582875/work
-cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
 ffmpeg-python==0.2.0
-fonttools @ file:///croot/fonttools_1713551344105/work
-future==1.0.0
-idna @ file:///work/ci_py311/idna_1676822698822/work
-intel-openmp==2024.1.0
-joblib @ file:///croot/joblib_1713976767370/work
-kiwisolver @ file:///work/ci_py311/kiwisolver_1676827230232/work
-matplotlib @ file:///croot/matplotlib-suite_1713336378214/work
-mkl-fft @ file:///croot/mkl_fft_1695058164594/work
-mkl-random @ file:///croot/mkl_random_1695059800811/work
-mkl-service==2.4.0
-numpy @ file:///work/mkl/numpy_and_numpy_base_1682953417311/work
+joblib==1.4.2
+matplotlib==3.8.4
+numpy==1.26.4
 opencv-python==4.9.0.80
-packaging @ file:///croot/packaging_1710807400464/work
-pillow @ file:///croot/pillow_1707233021655/work
-ply==3.11
-pyparsing @ file:///work/ci_py311/pyparsing_1677811559502/work
-PyQt5==5.15.10
-PyQt5-sip @ file:///croot/pyqt-split_1698769088074/work/pyqt_sip
-PySocks @ file:///work/ci_py311/pysocks_1676822712504/work
-python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
-pywavelets @ file:///croot/pywavelets_1705049820073/work
-requests @ file:///croot/requests_1707355572290/work
-scikit-learn @ file:///croot/scikit-learn_1694788527225/work
-scipy @ file:///croot/scipy_1710947333060/work/dist/scipy-1.12.0-cp311-cp311-linux_x86_64.whl#sha256=7b785ae9c9d29498ceb02b3fe6408543b84694d22ee384fa27766e890cfbbd2f
-sip @ file:///croot/sip_1698675935381/work
-six @ file:///tmp/build/80754af9/six_1644875935023/work
-threadpoolctl @ file:///Users/ktietz/demo/mc3/conda-bld/threadpoolctl_1629802263681/work
-tornado @ file:///croot/tornado_1696936946304/work
-tqdm @ file:///croot/tqdm_1679561862951/work
-unicodedata2 @ file:///croot/unicodedata2_1713212950228/work
-urllib3 @ file:///croot/urllib3_1707770551213/work
+pillow==10.3.0
+PyWavelets==1.6.0
+requests==2.31.0
+scikit-learn==1.4.2
+scipy==1.13.0
+threadpoolctl==3.5.0
+tqdm==4.66.4

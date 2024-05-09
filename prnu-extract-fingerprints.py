@@ -75,7 +75,7 @@ def procedure(video_path: str):
     # fingerprint
     clips_fingerprints_k = []
     k_frames = []
-    frames_count = 4  # 60
+    frames_count = 50
     for i in seq:
         y = list(range(i, i + frames_count))
         k_frames.append(extract_frames(mp4file, y))

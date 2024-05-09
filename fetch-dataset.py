@@ -3,6 +3,8 @@ import re
 import requests
 import os
 
+import params
+
 general_regex = "_.*/Nat/jpeg-h264/L./S./.*(.MOV|.mp4)"
 floreview_url = "https://lesc.dinfo.unifi.it/FloreView/"
 
@@ -35,5 +37,5 @@ def fetch_dataset(devices: list):
 
 
 if __name__ == "__main__":
-    fetch_dataset([13, 19, 5, 40, 32, 38])
-    fetch_dataset([35, 34, 33, 39, 17, 4])
+    for s in params.sequences:
+        fetch_dataset(list(set(s)))

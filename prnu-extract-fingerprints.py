@@ -24,11 +24,11 @@ def save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce):
 
     with open(output_path + "aligned_cc.csv", "w") as output_file:
         for row in aligned_cc:
-            output_file.write(",".join((str(i) for i in row)) + "\n")
+            output_file.write(",".join(("{:.1f}".format(i) for i in row)) + "\n")
 
     with open(output_path + "pce.csv", "w") as output_file:
         for row in pce_rot:
-            output_file.write(",".join((str(i) for i in row)) + "\n")
+            output_file.write(",".join(("{:.1f}".format(i) for i in row)) + "\n")
 
     with open(output_path + "stats_cc.csv", "w") as output_file:
         output_file.write("TPR:," + ",".join((str(i) for i in stats_cc['tpr'])) + "\n")

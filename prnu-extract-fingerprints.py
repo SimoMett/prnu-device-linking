@@ -1,3 +1,4 @@
+import pickle
 import re
 import sys
 import os
@@ -73,14 +74,20 @@ def procedure(video_path: str):
     ground_truth = prnu.gt(clips_seq, clips_seq)
 
     # fingerprint
-    clips_fingerprints_k = []
-    frames_count = fps*10
-    for i in seq:
-        print("Extracting..")
-        b = list(range(i, i + frames_count if i + frames_count < tot_frames else tot_frames-1))
-        f = extract_frames(mp4file, b)
-        print("Computing fingerprint..")
-        clips_fingerprints_k.append(prnu.extract_multiple_aligned(f))
+    if not os.path.exists("cached_fingerprints.pickle"):
+        clips_fingerprints_k = []
+        frames_count = fps*10
+        for i in seq:
+            print("Extracting..")
+            b = list(range(i, i + frames_count if i + frames_count < tot_frames else tot_frames-1))
+            f = extract_frames(mp4file, b)
+            print("Computing fingerprint..")
+            clips_fingerprints_k.append(prnu.extract_multiple_aligned(f))
+        save_as_pickle("cached_fingerprints.pickle", clips_fingerprints_k)
+    else:
+        print("Using cached_fingerprints.pickle")
+        with open("cached_fingerprints.pickle", "rb") as file:
+            clips_fingerprints_k = pickle.load(file)
 
     # cross-correlation (CC)
     print("Cross-correlation")

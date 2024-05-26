@@ -74,15 +74,16 @@ def procedure(video_path: str):
 
     # fingerprint
     clips_fingerprints_k = []
-    k_frames = []
-    frames_count = 50
+    frames_count = fps*10
     for i in seq:
-        y = list(range(i, i + frames_count))
-        k_frames.append(extract_frames(mp4file, y))
-    for i, f in enumerate(k_frames):
+        print("Extracting..")
+        b = list(range(i, i + frames_count if i + frames_count < tot_frames else tot_frames-1))
+        f = extract_frames(mp4file, b)
+        print("Computing fingerprint..")
         clips_fingerprints_k.append(prnu.extract_multiple_aligned(f))
 
     # cross-correlation (CC)
+    print("Cross-correlation")
     #  extract residuals from samples
     samples = extract_frames(mp4file, seq)
     pool = Pool(os.cpu_count()-1 if os.cpu_count() != 1 else 1)
@@ -92,6 +93,7 @@ def procedure(video_path: str):
     stats_cc = prnu.stats(aligned_cc, ground_truth)
 
     # peak to correlation energy (PCE)
+    print("Peak to correlation energy")
     pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
     pp = [[None for i in range(len(clips_fingerprints_k))] for j in range(len(residuals_w))]
     pool = Pool(os.cpu_count()-1 if os.cpu_count() != 1 else 1)

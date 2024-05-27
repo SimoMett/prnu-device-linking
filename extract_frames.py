@@ -49,6 +49,16 @@ def export_pngs(video_file):
         png_image.save(filename)
 
 
+def export_pngs_seq(mp4file, seq, out_name):
+    frames = extract_frames(mp4file, seq)
+
+    os.makedirs(out_name, exist_ok=True)
+    for i, f in enumerate(frames):
+        filename = out_name + "/frame" + str(i) + ".png"
+        png_image = Image.fromarray(f)
+        png_image.save(filename)
+
+
 if __name__ == "__main__":
     for mp4 in glob.glob(sys.argv[1]):
         export_pngs(mp4)

@@ -9,7 +9,8 @@ import numpy as np
 import pickle as pk
 import params
 import prnu
-from extract_frames import sequence_from_groundtruth, extract_frames
+from extract_frames import extract_frames
+from scene_detect import sequence_from_scenedetect
 
 
 def save_as_pickle(filename: str, object):
@@ -61,7 +62,7 @@ def procedure(video_path: str):
     fps = int(mp4file.get(cv2.CAP_PROP_FPS))
     tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
     print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
-    seq = sequence_from_groundtruth(mp4file)
+    seq = sequence_from_scenedetect(video_path)
 
     # ground truth
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1
@@ -76,10 +77,9 @@ def procedure(video_path: str):
     # fingerprint
     if not os.path.exists("cached_fingerprints.pickle"):
         clips_fingerprints_k = []
-        frames_count = fps*10
-        for i in seq:
+        for i in range(len(seq)-1):
             print("Extracting..")
-            b = list(range(i, i + frames_count if i + frames_count < tot_frames else tot_frames-1))
+            b = list(range(seq[i], seq[i+1]))
             f = extract_frames(mp4file, b)
             print("Computing fingerprint..")
             clips_fingerprints_k.append(prnu.extract_multiple_aligned(f))
@@ -92,7 +92,7 @@ def procedure(video_path: str):
     # cross-correlation (CC)
     print("Cross-correlation")
     #  extract residuals from samples
-    samples = extract_frames(mp4file, seq)
+    samples = extract_frames(mp4file, seq[:-1])
     pool = Pool(os.cpu_count()-1 if os.cpu_count() != 1 else 1)
     residuals_w = pool.map(prnu.extract_single, samples)
     pool.close()

@@ -3,3 +3,5 @@
 - Il dispositivo iPadAir ha filmati con risoluzione ridotta (1270x720) rispetto alla standard 1920x1080. Fare stretching?
 - Il video L2S2 dello Xiaomi RedmiNote8T è stato filmato in orizzontale.
     È stato riorientato manualmente con il comando 'ffmpeg -i D04_L2S2C4.mp4 -vf transpose=2 D04_L2S2C4_2.mp4'
+
+- Le fingerprint del dispositivo Apple è sempre diversa ogni volta che la ricalcolo

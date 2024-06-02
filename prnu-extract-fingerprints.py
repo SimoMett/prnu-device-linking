@@ -79,10 +79,9 @@ def procedure(video_path: str):
         clips_fingerprints_k = []
         for i in range(len(seq)-1):
             print("Extracting..")
-            b = list(range(seq[i], seq[i+1]))
-            f = extract_frames(mp4file, b)
+            f = extract_frames(mp4file, list(range(seq[i], seq[i+1])))
             print("Computing fingerprint..")
-            clips_fingerprints_k.append(prnu.extract_multiple_aligned(f))
+            clips_fingerprints_k.append(prnu.extract_multiple_aligned(f, processes=os.cpu_count()-1 if os.cpu_count() != 1 else 1))
         save_as_pickle("cached_fingerprints.pickle", clips_fingerprints_k)
     else:
         print("Using cached_fingerprints.pickle")

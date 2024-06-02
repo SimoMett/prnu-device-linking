@@ -4,4 +4,8 @@
 - Il video L2S2 dello Xiaomi RedmiNote8T è stato filmato in orizzontale.
     È stato riorientato manualmente con il comando 'ffmpeg -i D04_L2S2C4.mp4 -vf transpose=2 D04_L2S2C4_2.mp4'
 
-- Le fingerprint del dispositivo Apple è sempre diversa ogni volta che la ricalcolo
+- clips_fingerprints_k è costante in ogni iterazione (bene)
+- Le fingerprint del dispositivo Apple è sempre diversa ogni volta che la ricalcolo (perché?)
+- residuals_w è costante in ogni iterazione (bene)
+- aligned_cc è costante in ogni iterazione (bene)
+- la crosscorrelazione non è simmetrica a causa della rotazione di 90° nelle righe 441 e 442 in 'functions.py'.

@@ -118,24 +118,25 @@ def procedure(video_path: str):
     aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']
     stats_cc = prnu.stats(aligned_cc, ground_truth)
 
-    # peak to correlation energy (PCE)
     print("Peak to correlation energy")
-    pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
-    pp = [[None for i in range(len(clips_fingerprints_k))] for j in range(len(residuals_w))]
-    pool = Pool(os.cpu_count()-1 if os.cpu_count() != 1 else 1)
-
-    for i, fp_k in enumerate(clips_fingerprints_k):
-        for j, res_w in enumerate(residuals_w):
-            pp[i][j] = pool.apply_async(pce_rot_func, (fp_k, res_w,))
-
-    for i, fp_k in enumerate(clips_fingerprints_k):
-        for j, res_w in enumerate(residuals_w):
-            pce_rot[i, j] = pp[i][j].get()
-
-    pool.close()
+    pce_rot = compute_pce(clips_fingerprints_k, residuals_w)
     stats_pce = prnu.stats(pce_rot, ground_truth)
     save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce)
     return
+
+
+def compute_pce(clips_fingerprints_k, residuals_w):
+    pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
+    pp = [[None for _ in range(len(clips_fingerprints_k))] for _ in range(len(residuals_w))]
+    pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
+    for i, fp_k in enumerate(clips_fingerprints_k):
+        for j, res_w in enumerate(residuals_w):
+            pp[i][j] = pool.apply_async(pce_rot_func, (fp_k, res_w,))
+    for i, fp_k in enumerate(clips_fingerprints_k):
+        for j, res_w in enumerate(residuals_w):
+            pce_rot[i, j] = pp[i][j].get()
+    pool.close()
+    return pce_rot
 
 
 if __name__ == "__main__":

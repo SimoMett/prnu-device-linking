@@ -83,14 +83,12 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     NN = np.zeros((h, w, ch), np.float32)
 
     if processes is None or processes > 1:
+        # TODO more refactoring
+        # First half of imgs
         RPsum_a = np.zeros((h, w, ch), np.float32)
         NN_a = np.zeros((h, w, ch), np.float32)
-
-        # First half of imgs
         block_a = imgs[:int(len(imgs) / 2)]
-        args_list = []
-        for im in block_a:
-            args_list += [(im, levels, sigma)]
+        args_list = [(im, levels, sigma) for im in block_a]
         pool = Pool(processes=processes)
 
         for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_a)), disable=tqdm_str == '',
@@ -111,9 +109,7 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
         RPsum_b = np.zeros((h, w, ch), np.float32)
         NN_b = np.zeros((h, w, ch), np.float32)
         block_b = imgs[int(len(imgs) / 2):]
-        args_list = []
-        for im in block_b:
-            args_list += [(im, levels, sigma)]
+        args_list = [(im, levels, sigma) for im in block_b]
         pool = Pool(processes=processes)
 
         for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_b)), disable=tqdm_str == '',

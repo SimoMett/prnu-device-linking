@@ -85,49 +85,50 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     if processes is None or processes > 1:
         RPsum_a = np.zeros((h, w, ch), np.float32)
         NN_a = np.zeros((h, w, ch), np.float32)
+
         # First half of imgs
-        with imgs[:int(len(imgs) / 2)] as block_a:
-            args_list = []
-            for im in block_a:
-                args_list += [(im, levels, sigma)]
-            pool = Pool(processes=processes)
+        block_a = imgs[:int(len(imgs) / 2)]
+        args_list = []
+        for im in block_a:
+            args_list += [(im, levels, sigma)]
+        pool = Pool(processes=processes)
 
-            for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_a)), disable=tqdm_str == '',
-                                   desc=(tqdm_str + ' (1/2)'), dynamic_ncols=True):
-                nni = pool.map(inten_sat_compact, args_list[batch_idx0:batch_idx0 + batch_size])
-                for ni in nni:
-                    NN_a += ni
-                del nni
+        for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_a)), disable=tqdm_str == '',
+                               desc=(tqdm_str + ' (1/2)'), dynamic_ncols=True):
+            nni = pool.map(inten_sat_compact, args_list[batch_idx0:batch_idx0 + batch_size])
+            for ni in nni:
+                NN_a += ni
+            del nni
 
-            for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_a)), disable=tqdm_str == '',
-                                   desc=(tqdm_str + ' (2/2)'), dynamic_ncols=True):
-                wi_list = pool.map(noise_extract_compact, args_list[batch_idx0:batch_idx0 + batch_size])
-                for wi in wi_list:
-                    RPsum_a += wi
-                del wi_list
+        for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_a)), disable=tqdm_str == '',
+                               desc=(tqdm_str + ' (2/2)'), dynamic_ncols=True):
+            wi_list = pool.map(noise_extract_compact, args_list[batch_idx0:batch_idx0 + batch_size])
+            for wi in wi_list:
+                RPsum_a += wi
+            del wi_list
 
         # Second half of imgs
         RPsum_b = np.zeros((h, w, ch), np.float32)
         NN_b = np.zeros((h, w, ch), np.float32)
-        with imgs[int(len(imgs) / 2):] as block_b:
-            args_list = []
-            for im in block_b:
-                args_list += [(im, levels, sigma)]
-            pool = Pool(processes=processes)
+        block_b = imgs[int(len(imgs) / 2):]
+        args_list = []
+        for im in block_b:
+            args_list += [(im, levels, sigma)]
+        pool = Pool(processes=processes)
 
-            for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_b)), disable=tqdm_str == '',
-                                   desc=(tqdm_str + ' (1/2)'), dynamic_ncols=True):
-                nni = pool.map(inten_sat_compact, args_list[batch_idx0:batch_idx0 + batch_size])
-                for ni in nni:
-                    NN_b += ni
-                del nni
+        for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_b)), disable=tqdm_str == '',
+                               desc=(tqdm_str + ' (1/2)'), dynamic_ncols=True):
+            nni = pool.map(inten_sat_compact, args_list[batch_idx0:batch_idx0 + batch_size])
+            for ni in nni:
+                NN_b += ni
+            del nni
 
-            for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_b)), disable=tqdm_str == '',
-                                   desc=(tqdm_str + ' (2/2)'), dynamic_ncols=True):
-                wi_list = pool.map(noise_extract_compact, args_list[batch_idx0:batch_idx0 + batch_size])
-                for wi in wi_list:
-                    RPsum_b += wi
-                del wi_list
+        for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_b)), disable=tqdm_str == '',
+                               desc=(tqdm_str + ' (2/2)'), dynamic_ncols=True):
+            wi_list = pool.map(noise_extract_compact, args_list[batch_idx0:batch_idx0 + batch_size])
+            for wi in wi_list:
+                RPsum_b += wi
+            del wi_list
         pool.close()
 
     else:  # Single process
@@ -204,7 +205,7 @@ def procedure(video_path: str):
     if not os.path.exists("cached_fingerprints.pickle"):
         clips_fingerprints_k = []
         for i in range(len(seq) - 1):
-            print("Extracting frames from clip..")
+            print("{}) Extracting frames from clip..".format(i+1))
             f = extract_frames(mp4file, list(range(seq[i], seq[i + 1])))
             print("Computing fingerprint..")
 

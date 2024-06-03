@@ -186,11 +186,6 @@ def procedure(video_path: str):
     # ground truth
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1
     clips_seq = params.sequences[seq_idx]
-    # x = []
-    # for i in clips_seq:
-    #     if i not in x:
-    #         x.append(i)
-    # ground_truth = prnu.gt(x, clips_seq)
     ground_truth = prnu.gt(clips_seq, clips_seq)
 
     print("Extracting residuals from chosen samples")

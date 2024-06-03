@@ -192,33 +192,30 @@ def procedure(video_path: str):
     # ground_truth = prnu.gt(x, clips_seq)
     ground_truth = prnu.gt(clips_seq, clips_seq)
 
-    # fingerprint
-    clips_fingerprints_k = []
-
-    if "--fingerprints-cache" in sys.argv and os.path.exists(sys.argv[sys.argv.index("--fingerprints-cache") + 1]):
-        cache_file = sys.argv[sys.argv.index("--fingerprints-cache") + 1]
-        print("Using", cache_file)
-        with open(cache_file, "rb") as file:
-            clips_fingerprints_k = pickle.load(file)
-    else:
-        for i in range(len(seq) - 1):
-            print("Extracting..")
-            f = extract_frames(mp4file, list(range(seq[i], seq[i + 1])))
-            print("Computing fingerprint..")
-            clips_fingerprints_k.append(prnu.extract_multiple_aligned(f, processes=os.cpu_count() - 1 if os.cpu_count() != 1 else 1))
-
-    if "--fingerprints-cache" in sys.argv:
-        cache_file = sys.argv[sys.argv.index("--fingerprints-cache") + 1]
-        save_as_pickle(cache_file, clips_fingerprints_k)
-
-
-    # cross-correlation (CC)
-    print("Cross-correlation")
-    #  extract residuals from samples
+    print("Extracting residuals from chosen samples")
     samples = extract_frames(mp4file, seq[:-1])
-    pool = Pool(os.cpu_count()-1 if os.cpu_count() != 1 else 1)
+    pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
     residuals_w = pool.map(prnu.extract_single, samples)
     pool.close()
+
+    # fingerprint
+    threads_count = cpu_count() - 1 if cpu_count() != 1 else 1
+    clips_fingerprints_k = []
+    if not os.path.exists("cached_fingerprints.pickle"):
+        clips_fingerprints_k = []
+        for i in range(len(seq) - 1):
+            print("Extracting frames from clip..")
+            f = extract_frames(mp4file, list(range(seq[i], seq[i + 1])))
+            print("Computing fingerprint..")
+
+            clips_fingerprints_k.append(extract_and_test_multiple_aligned(f, processes=threads_count))
+        save_as_pickle("cached_fingerprints.pickle", clips_fingerprints_k)
+    else:
+        print("Using cached_fingerprints.pickle")
+        with open("cached_fingerprints.pickle", "rb") as file:
+            clips_fingerprints_k = pickle.load(file)
+
+    print("Cross-correlation")
     aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']
     stats_cc = prnu.stats(aligned_cc, ground_truth)
 

@@ -196,7 +196,7 @@ def procedure(video_path: str):
     if not os.path.exists("cached_fingerprints.pickle"):
         clips_fingerprints_k = []
         for i in range(len(seq) - 1):
-            print("{}) Extracting frames from clip..".format(i+1))
+            print("Extracting frames from clip", i+1)
             f = extract_frames(mp4file, list(range(seq[i], seq[i + 1])))
             print("Computing fingerprint..")
 

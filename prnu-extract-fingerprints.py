@@ -52,6 +52,20 @@ def save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce):
 def pce_rot_func(_fp_k, _res_w):
     return prnu.pce(prnu.crosscorr_2d(_fp_k, _res_w))['pce']
 
+def prnu_quality_test(frames, processes):
+    block_a = frames[:int(len(frames) / 2)]
+    block_b = frames[int(len(frames) / 2):]
+    print("Computing fingerprints..")
+    fp_a = prnu.extract_multiple_aligned(block_a, processes=processes)
+    fp_b = prnu.extract_multiple_aligned(block_b, processes=processes)
+
+    print("Peak to correlation energy")
+    pce = prnu.pce(prnu.crosscorr_2d(fp_a, fp_b))['pce']
+    if pce < 60:
+        print("Warning: low PCE found:", pce)
+    else:
+        print(pce)
+
 
 def procedure(video_path: str):
     if os.path.isdir(video_path.replace(".mp4", "/")):

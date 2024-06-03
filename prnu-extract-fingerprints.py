@@ -75,18 +75,24 @@ def procedure(video_path: str):
     ground_truth = prnu.gt(clips_seq, clips_seq)
 
     # fingerprint
-    if not os.path.exists("cached_fingerprints.pickle"):
-        clips_fingerprints_k = []
-        for i in range(len(seq)-1):
-            print("Extracting..")
-            f = extract_frames(mp4file, list(range(seq[i], seq[i+1])))
-            print("Computing fingerprint..")
-            clips_fingerprints_k.append(prnu.extract_multiple_aligned(f, processes=os.cpu_count()-1 if os.cpu_count() != 1 else 1))
-        save_as_pickle("cached_fingerprints.pickle", clips_fingerprints_k)
-    else:
-        print("Using cached_fingerprints.pickle")
-        with open("cached_fingerprints.pickle", "rb") as file:
+    clips_fingerprints_k = []
+
+    if "--fingerprints-cache" in sys.argv and os.path.exists(sys.argv[sys.argv.index("--fingerprints-cache") + 1]):
+        cache_file = sys.argv[sys.argv.index("--fingerprints-cache") + 1]
+        print("Using", cache_file)
+        with open(cache_file, "rb") as file:
             clips_fingerprints_k = pickle.load(file)
+    else:
+        for i in range(len(seq) - 1):
+            print("Extracting..")
+            f = extract_frames(mp4file, list(range(seq[i], seq[i + 1])))
+            print("Computing fingerprint..")
+            clips_fingerprints_k.append(prnu.extract_multiple_aligned(f, processes=os.cpu_count() - 1 if os.cpu_count() != 1 else 1))
+
+    if "--fingerprints-cache" in sys.argv:
+        cache_file = sys.argv[sys.argv.index("--fingerprints-cache") + 1]
+        save_as_pickle(cache_file, clips_fingerprints_k)
+
 
     # cross-correlation (CC)
     print("Cross-correlation")

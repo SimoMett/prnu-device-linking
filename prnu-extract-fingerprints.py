@@ -193,19 +193,29 @@ def procedure(video_path: str):
     # fingerprint
     threads_count = cpu_count() - 1 if cpu_count() != 1 else 1
     clips_fingerprints_k = []
-    if not os.path.exists("cached_fingerprints.pickle"):
-        clips_fingerprints_k = []
-        for i in range(len(seq) - 1):
-            print("Extracting frames from clip", i+1)
-            f = extract_frames(mp4file, list(range(seq[i], seq[i + 1])))
-            print("Computing fingerprint..")
+    #if not os.path.exists("cached_fingerprints.pickle"):
+    #    clips_fingerprints_k = []
+    #    for i in range(len(seq) - 1):
+    #        print("Extracting frames from clip", i+1)
+    #        # end = seq[i + 1]
+    #        end = seq[i] + 4
+    #        f = extract_frames(mp4file, list(range(seq[i], end)))
+    #        print("Computing fingerprint..")
 
-            clips_fingerprints_k.append(extract_and_test_multiple_aligned(f, processes=threads_count))
-        save_as_pickle("cached_fingerprints.pickle", clips_fingerprints_k)
-    else:
-        print("Using cached_fingerprints.pickle")
-        with open("cached_fingerprints.pickle", "rb") as file:
-            clips_fingerprints_k = pickle.load(file)
+    #        clips_fingerprints_k.append(extract_and_test_multiple_aligned(f, processes=threads_count))
+    #    save_as_pickle("cached_fingerprints.pickle", clips_fingerprints_k)
+    #else:
+    #    print("Using cached_fingerprints.pickle")
+    #    with open("cached_fingerprints.pickle", "rb") as file:
+    #        clips_fingerprints_k = pickle.load(file)
+
+    for i in range(len(seq) - 1):
+        print("Extracting frames from clip", i + 1)
+        # end = seq[i + 1]
+        end = seq[i] + 4
+        f = extract_frames(mp4file, list(range(seq[i], end)))
+        print("Computing fingerprint..")
+        clips_fingerprints_k.append(extract_and_test_multiple_aligned(f, processes=threads_count))
 
     print("Cross-correlation")
     aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']

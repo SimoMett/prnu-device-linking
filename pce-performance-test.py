@@ -148,6 +148,8 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
 
 
 def procedure(video_path: str, frames_count: int):
+    threads_count = cpu_count() - 1 if cpu_count() != 1 else 1
+    #threads_count = 1
     mp4file = cv2.VideoCapture(video_path)
     fps = int(mp4file.get(cv2.CAP_PROP_FPS))
     tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -161,13 +163,12 @@ def procedure(video_path: str, frames_count: int):
 
     print("Extracting residuals from chosen samples")
     samples = extract_frames(mp4file, seq[:-1])
-    pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
+    pool = Pool(threads_count)
     residuals_w = pool.map(prnu.extract_single, samples)
     pool.close()
     del pool
 
     # fingerprint
-    threads_count = cpu_count() - 1 if cpu_count() != 1 else 1
     clips_fingerprints_k = []
     for i in range(len(seq) - 1):
         print("Extracting frames from clip", i + 1)
@@ -186,7 +187,7 @@ def procedure(video_path: str, frames_count: int):
 
 def compute_pce(clips_fingerprints_k, residuals_w):
     pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
-    pp = [[None for _ in range(len(clips_fingerprints_k))] for _ in range(len(residuals_w))]
+    pp = [[None for __ in clips_fingerprints_k] for _ in residuals_w]
     pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
     for i, fp_k in enumerate(clips_fingerprints_k):
         for j, res_w in enumerate(residuals_w):

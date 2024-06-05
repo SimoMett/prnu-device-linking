@@ -1,11 +1,9 @@
-import pickle
 import re
 import sys
 import os
 from multiprocessing import Pool, cpu_count
 import cv2
 import numpy as np
-import pickle as pk
 from tqdm import tqdm
 import params
 import prnu
@@ -13,13 +11,6 @@ from extract_frames import extract_frames
 from prnu import inten_sat_compact, noise_extract_compact, inten_scale, saturation, rgb2gray, zero_mean_total, \
     wiener_dft
 from scene_detect import sequence_from_scenedetect
-
-
-def save_as_pickle(filename: str, object):
-    with open(filename, "wb") as output_file:
-        pk.dump(object, output_file)
-    print("Generated", filename)
-    return
 
 
 def save_results(output_path, pce_rot, stats_pce):
@@ -173,6 +164,7 @@ def procedure(video_path: str, frames_count: int):
     pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
     residuals_w = pool.map(prnu.extract_single, samples)
     pool.close()
+    del pool
 
     # fingerprint
     threads_count = cpu_count() - 1 if cpu_count() != 1 else 1
@@ -208,5 +200,5 @@ def compute_pce(clips_fingerprints_k, residuals_w):
 
 if __name__ == "__main__":
     for s in sys.argv[1::]:
-        for j in [4, 16, 50, None]:
+        for j in [5, 20, 50, None]:
             procedure(s, j)

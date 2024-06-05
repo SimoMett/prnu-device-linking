@@ -200,6 +200,6 @@ def compute_pce(clips_fingerprints_k, residuals_w):
 
 
 if __name__ == "__main__":
-    for s in sys.argv[1::]:
-        for j in [5, 20, 50, None]:
-            procedure(s, j)
+    s = sys.argv[1]
+    j = int(sys.argv[2])
+    procedure(s, j)

@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 # import scipy.signal
 import matplotlib
+from tqdm import tqdm
 
 from extract_frames import extract_frame
 
@@ -55,20 +56,19 @@ def main():
     lp_cutoff = 8  # using 16 for 1080p frames. This parameter has to be adjusted for other resolutions
     # using 0 for no LP filter
 
-    capture = cv2.VideoCapture("output/Seq2_Clip_L01S02.mp4")
+    capture = cv2.VideoCapture("output/Seq2_Clip_L07S03.mp4")
     tot_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
     values = []
     capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
     old_frame = cv2.cvtColor(capture.read()[1], cv2.COLOR_BGR2GRAY).astype(int)
     interval = 1
-    for i in range(interval-1, tot_frames, interval):
-        print(i)
+    for i in tqdm(range(interval-1, tot_frames, interval)):
         capture.set(cv2.CAP_PROP_POS_FRAMES, i)
         new_frame = cv2.cvtColor(capture.read()[1], cv2.COLOR_BGR2GRAY).astype(int)
         values.append(stability_measure(old_frame, new_frame, lp_cutoff))
         old_frame = new_frame
     plt.subplot(2, 1, 1)
-    plt.title("Seq2_Clip_L01S02.mp4")
+    plt.title("Seq2_Clip_L07S03.mp4")
     plt.plot([i for i in range(len(values))], np.log(values), color="blue")
     # print(find_peaks(values, np.std(values) * 3))
     # print(scipy.signal.find_peaks(np.log(values), prominence=1))

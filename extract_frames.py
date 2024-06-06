@@ -12,7 +12,7 @@ def extract_frame(video_capture, frame_number):
     res, frame = mp4file.read()
     return res, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-
+# deprecated
 def sequence_from_groundtruth(video_capture):
     # The ground truth is: every 10 seconds there's a clip change
     seconds_between_clips = 10
@@ -23,7 +23,7 @@ def sequence_from_groundtruth(video_capture):
     #  which is weird because every video should be 100 seconds long at 30fps, i.e. 3000 frames long.
     #  Maybe some floating errors?
     # Correction: there are also videos at 25 fps and 2504 frames long
-    offset = 10
+    offset = 10  # 9?
     return [i for i in range(offset, tot_frames, fps * seconds_between_clips)]
 
 

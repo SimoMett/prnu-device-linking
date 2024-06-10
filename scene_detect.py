@@ -4,7 +4,8 @@ from scenedetect import detect, ContentDetector, AdaptiveDetector
 
 
 def sequence_from_scenedetect(video_path):
-    scene_list = detect(video_path, AdaptiveDetector(adaptive_threshold=2.73, weights=ContentDetector.Components(1.1, 1, 0, 1.3)))
+    scene_list = detect(video_path, AdaptiveDetector(adaptive_threshold=2.73, weights=ContentDetector.Components(1.1, 1, 0, 1.3), min_scene_len=230))
+    assert is_valid_seq(scene_list)
     return [0] + [e[1].frame_num for e in scene_list]
 
 

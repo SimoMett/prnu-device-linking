@@ -178,7 +178,6 @@ def procedure(video_path: str):
     tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
     print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
     seq = sequence_from_scenedetect(video_path)
-    assert scene_detect.is_valid_seq(seq)
 
     # ground truth
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1

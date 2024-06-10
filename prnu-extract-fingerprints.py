@@ -8,6 +8,7 @@ import pickle as pk
 from tqdm import tqdm
 import params
 import prnu
+import scene_detect
 from extract_frames import extract_frames
 from prnu import inten_sat_compact, noise_extract_compact, inten_scale, saturation, rgb2gray, zero_mean_total, \
     wiener_dft
@@ -177,6 +178,7 @@ def procedure(video_path: str):
     tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
     print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
     seq = sequence_from_scenedetect(video_path)
+    assert scene_detect.is_valid_seq(seq)
 
     # ground truth
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1
@@ -192,21 +194,6 @@ def procedure(video_path: str):
     # fingerprint
     threads_count = cpu_count() - 1 if cpu_count() != 1 else 1
     clips_fingerprints_k = []
-    #if not os.path.exists("cached_fingerprints.pickle"):
-    #    clips_fingerprints_k = []
-    #    for i in range(len(seq) - 1):
-    #        print("Extracting frames from clip", i+1)
-    #        # end = seq[i + 1]
-    #        end = seq[i] + 4
-    #        f = extract_frames(mp4file, list(range(seq[i], end)))
-    #        print("Computing fingerprint..")
-
-    #        clips_fingerprints_k.append(extract_and_test_multiple_aligned(f, processes=threads_count))
-    #    save_as_pickle("cached_fingerprints.pickle", clips_fingerprints_k)
-    #else:
-    #    print("Using cached_fingerprints.pickle")
-    #    with open("cached_fingerprints.pickle", "rb") as file:
-    #        clips_fingerprints_k = pickle.load(file)
 
     for i in range(len(seq) - 1):
         print("Extracting frames from clip", i + 1)

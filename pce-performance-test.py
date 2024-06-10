@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 import params
 import prnu
+import scene_detect
 from extract_frames import extract_frames
 from prnu import inten_sat_compact, noise_extract_compact, inten_scale, saturation, rgb2gray, zero_mean_total, \
     wiener_dft
@@ -155,6 +156,7 @@ def procedure(video_path: str, frames_count: int):
     tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
     print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
     seq = sequence_from_scenedetect(video_path)
+    assert scene_detect.is_valid_seq(seq)
 
     # ground truth
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1

@@ -1,17 +1,13 @@
-import re
-import sys
+import glob
 import os
 from multiprocessing import Pool, cpu_count
 import cv2
 import numpy as np
 from tqdm import tqdm
-import params
 import prnu
-import scene_detect
 from extract_frames import extract_frames
 from prnu import inten_sat_compact, noise_extract_compact, inten_scale, saturation, rgb2gray, zero_mean_total, \
     wiener_dft
-from scene_detect import sequence_from_scenedetect
 
 
 def save_results(output_path, pce_rot, stats_pce):
@@ -158,36 +154,28 @@ def procedure(video_path: str, frames_count):
     seq = [0, tot_frames]
 
     # fingerprint
-    clips_fingerprints_k = []
     for i in range(len(seq) - 1):
         end = seq[i] + frames_count if frames_count is not None else seq[i + 1]
         f = extract_frames(mp4file, list(range(seq[i], end)))
         print("Computing fingerprint from", end - seq[i], "frames..")
 
-        clips_fingerprints_k.append(extract_and_test_multiple_aligned(f, processes=threads_count))
+        extract_and_test_multiple_aligned(f, processes=threads_count)
     return
 
 
-def compute_pce(clips_fingerprints_k, residuals_w):
-    pce_rot = np.zeros((len(clips_fingerprints_k), len(residuals_w)))
-    pp = [[None for __ in clips_fingerprints_k] for _ in residuals_w]
-    pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
-    for i, fp_k in enumerate(clips_fingerprints_k):
-        for j, res_w in enumerate(residuals_w):
-            pp[i][j] = pool.apply_async(pce_rot_func, (fp_k, res_w,))
-    for i, fp_k in enumerate(clips_fingerprints_k):
-        for j, res_w in enumerate(residuals_w):
-            pce_rot[i, j] = pp[i][j].get()
-    pool.close()
-    return pce_rot
-
-
 if __name__ == "__main__":
-    s = sys.argv[1]
-    procedure(s, 20)
-    procedure(s, 40)
-    procedure(s, 60)
-    procedure(s, 80)
-    procedure(s, 120)
-    procedure(s, 240)
-    procedure(s, None)
+    # s = sys.argv[1]
+    for s in glob.glob("Dataset/D*/Nat/jpeg-h264/L1/S1/*.mp4"):
+        print(s)
+        procedure(s, 40)
+        procedure(s, 60)
+        procedure(s, 80)
+        procedure(s, 100)
+        procedure(s, None)
+    for s in glob.glob("Dataset/D*/Nat/jpeg-h264/L1/S1/*.MOV"):
+        print(s)
+        procedure(s, 40)
+        procedure(s, 60)
+        procedure(s, 80)
+        procedure(s, 100)
+        procedure(s, None)

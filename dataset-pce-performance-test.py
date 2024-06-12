@@ -171,11 +171,9 @@ if __name__ == "__main__":
         procedure(s, 60)
         procedure(s, 80)
         procedure(s, 100)
-        procedure(s, None)
     for s in glob.glob("Dataset/D*/Nat/jpeg-h264/L1/S1/*.MOV"):
         print(s)
         procedure(s, 40)
         procedure(s, 60)
         procedure(s, 80)
         procedure(s, 100)
-        procedure(s, None)

@@ -1,38 +1,20 @@
-import glob
+import sys
 import os
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
+
 import cv2
 import numpy as np
 from tqdm import tqdm
+
 import prnu
 from extract_frames import extract_frames
 from prnu import inten_sat_compact, noise_extract_compact, inten_scale, saturation, rgb2gray, zero_mean_total, \
     wiener_dft
-
-
-def save_results(output_path, pce_rot, stats_pce):
-    os.makedirs(output_path, exist_ok=True)
-
-    with open(output_path + "pce.csv", "w") as output_file:
-        for row in pce_rot:
-            output_file.write(",".join(("{:.1f}".format(i) for i in row)) + "\n")
-
-    with open(output_path + "stats_pce.csv", "w") as output_file:
-        output_file.write("TPR:," + ",".join((str(i) for i in stats_pce['tpr'])) + "\n")
-        output_file.write("FPR:," + ",".join((str(i) for i in stats_pce['fpr'])) + "\n")
-        output_file.write("TH:," + ",".join((str(i) for i in stats_pce['th'])) + "\n")
-        output_file.write("AUC:," + str(stats_pce['auc']) + "\n")
-        output_file.write("EER:," + str(stats_pce['eer']) + "\n")
-
-    # save_as_pickle(output_path + "full_results.pickle", (aligned_cc, stats_cc, pce_rot, stats_pce))
-
-
-def pce_rot_func(_fp_k, _res_w):
-    return prnu.pce(prnu.crosscorr_2d(_fp_k, _res_w))['pce']
+from scene_detect import sequence_from_scenedetect
 
 
 def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float = 5, processes: int = None,
-                                      batch_size=cpu_count(), tqdm_str: str = '') -> np.ndarray:
+                                      batch_size=os.cpu_count(), tqdm_str: str = '') -> np.ndarray:
     """
     @author: Luca Bondi (luca.bondi@polimi.it)
     @author: Paolo Bestagini (paolo.bestagini@polimi.it)
@@ -144,36 +126,56 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     return K
 
 
-def procedure(video_path: str, frames_count):
-    threads_count = cpu_count() - 1 if cpu_count() != 1 else 1
-    #threads_count = 1
+def prnu_quality_test(frames, processes):
+    block_a = frames[:int(len(frames) / 2)]
+    block_b = frames[int(len(frames) / 2):]
+    print("Computing fingerprints from", len(frames), "frames..")
+    fp_a = prnu.extract_multiple_aligned(block_a, processes=processes)
+    fp_b = prnu.extract_multiple_aligned(block_b, processes=processes)
+
+    print("Peak to correlation energy")
+    pce = prnu.pce(prnu.crosscorr_2d(fp_a, fp_b))['pce']
+    if pce < 60:
+        print("Warning: low PCE found:", pce)
+    else:
+        print(pce)
+    return pce
+
+
+def procedure(video_path: str):
+    if os.path.isdir(video_path.replace(".mp4", "/")):
+        print("Skipping", video_path + ". Results already exist.")
+        return
+    threads_count = os.cpu_count() - 1
+
     mp4file = cv2.VideoCapture(video_path)
     fps = int(mp4file.get(cv2.CAP_PROP_FPS))
     tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
-    # print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
+    print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
+    # seq = sequence_from_scenedetect(video_path)
     seq = [0, tot_frames]
 
     # fingerprint
     for i in range(len(seq) - 1):
-        end = seq[i] + frames_count if frames_count is not None else seq[i + 1]
-        f = extract_frames(mp4file, list(range(seq[i], end)))
-        print("Computing fingerprint from", end - seq[i], "frames..")
-
+        print("Extracting..")
+        max_frames = 500
+        f = extract_frames(mp4file, list(range(seq[i], seq[i + 1]))[:max_frames])
+        #prnu_quality_test(f[:40], threads_count)
+        #prnu_quality_test(f[:80], threads_count)
+        #prnu_quality_test(f[:100], threads_count)
+        #prnu_quality_test(f[:200], threads_count)
+        #prnu_quality_test(f[:400], threads_count)
+        #prnu_quality_test(f, threads_count)
+        extract_and_test_multiple_aligned(f[:40], processes=threads_count)
+        extract_and_test_multiple_aligned(f[:80], processes=threads_count)
+        extract_and_test_multiple_aligned(f[:100], processes=threads_count)
+        extract_and_test_multiple_aligned(f[:200], processes=threads_count)
+        extract_and_test_multiple_aligned(f[:400], processes=threads_count)
         extract_and_test_multiple_aligned(f, processes=threads_count)
+
     return
 
 
 if __name__ == "__main__":
-    # s = sys.argv[1]
-    for s in glob.glob("Dataset/D*/Nat/jpeg-h264/L1/S1/*.mp4"):
-        print(s)
-        procedure(s, 40)
-        procedure(s, 60)
-        procedure(s, 80)
-        procedure(s, 100)
-    for s in glob.glob("Dataset/D*/Nat/jpeg-h264/L1/S1/*.MOV"):
-        print(s)
-        procedure(s, 40)
-        procedure(s, 60)
-        procedure(s, 80)
-        procedure(s, 100)
+    for s in sys.argv[1::]:
+        procedure(s)

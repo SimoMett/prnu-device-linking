@@ -126,27 +126,11 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     return K
 
 
-def prnu_quality_test(frames, processes):
-    block_a = frames[:int(len(frames) / 2)]
-    block_b = frames[int(len(frames) / 2):]
-    print("Computing fingerprints from", len(frames), "frames..")
-    fp_a = prnu.extract_multiple_aligned(block_a, processes=processes)
-    fp_b = prnu.extract_multiple_aligned(block_b, processes=processes)
-
-    print("Peak to correlation energy")
-    pce = prnu.pce(prnu.crosscorr_2d(fp_a, fp_b))['pce']
-    if pce < 60:
-        print("Warning: low PCE found:", pce)
-    else:
-        print(pce)
-    return pce
-
-
 def procedure(video_path: str):
     if os.path.isdir(video_path.replace(".mp4", "/")):
         print("Skipping", video_path + ". Results already exist.")
         return
-    threads_count = os.cpu_count() - 1
+    threads_count = os.cpu_count() - 2
 
     mp4file = cv2.VideoCapture(video_path)
     fps = int(mp4file.get(cv2.CAP_PROP_FPS))
@@ -160,12 +144,6 @@ def procedure(video_path: str):
         print("Extracting..")
         max_frames = 500
         f = extract_frames(mp4file, list(range(seq[i], seq[i + 1]))[:max_frames])
-        #prnu_quality_test(f[:40], threads_count)
-        #prnu_quality_test(f[:80], threads_count)
-        #prnu_quality_test(f[:100], threads_count)
-        #prnu_quality_test(f[:200], threads_count)
-        #prnu_quality_test(f[:400], threads_count)
-        #prnu_quality_test(f, threads_count)
         extract_and_test_multiple_aligned(f[:40], processes=threads_count)
         extract_and_test_multiple_aligned(f[:80], processes=threads_count)
         extract_and_test_multiple_aligned(f[:100], processes=threads_count)

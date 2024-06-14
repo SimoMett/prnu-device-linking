@@ -55,8 +55,41 @@ def pce_rot_func(_fp_k, _res_w):
     return prnu.pce(prnu.crosscorr_2d(_fp_k, _res_w))['pce']
 
 
+def multiprocess_get_sum_and_nn(imgs, args_list, processes, batch_size, tqdm_str):
+    h, w, ch = imgs[0].shape
+    RPsum = np.zeros((h, w, ch), np.float32)
+    NN = np.zeros((h, w, ch), np.float32)
+    pool = Pool(processes=processes)
+
+    for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(imgs)), disable=tqdm_str == '',
+                           desc=(tqdm_str + ' (1/2)'), dynamic_ncols=True):
+        nni = pool.map(inten_sat_compact, args_list[batch_idx0:batch_idx0 + batch_size])
+        for ni in nni:
+            NN += ni
+        del nni
+
+    for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(imgs)), disable=tqdm_str == '',
+                           desc=(tqdm_str + ' (2/2)'), dynamic_ncols=True):
+        wi_list = pool.map(noise_extract_compact, args_list[batch_idx0:batch_idx0 + batch_size])
+        for wi in wi_list:
+            RPsum += wi
+        del wi_list
+    pool.close()
+    return RPsum, NN
+
+
+def get_sum_and_nn(imgs, levels, sigma, tqdm_str):
+    h, w, ch = imgs[0].shape
+    RPsum = np.zeros((h, w, ch), np.float32)
+    NN = np.zeros((h, w, ch), np.float32)
+    for im in tqdm(imgs, disable=tqdm_str is None, desc="1/2" + tqdm_str, dynamic_ncols=True):
+        RPsum += noise_extract_compact((im, levels, sigma))
+        NN += (inten_scale(im) * saturation(im)) ** 2
+    return RPsum, NN
+
+
 def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float = 5, processes: int = None,
-                                      batch_size=cpu_count(), tqdm_str: str = '') -> np.ndarray:
+                                      batch_size=cpu_count(), tqdm_str: str = '') -> (np.ndarray, float):
     """
     @author: Luca Bondi (luca.bondi@polimi.it)
     @author: Paolo Bestagini (paolo.bestagini@polimi.it)
@@ -85,78 +118,33 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     if processes is None or processes > 1:
         # TODO more refactoring
         # First half of imgs
-        RPsum_a = np.zeros((h, w, ch), np.float32)
-        NN_a = np.zeros((h, w, ch), np.float32)
         block_a = imgs[:int(len(imgs) / 2)]
         args_list = [(im, levels, sigma) for im in block_a]
-        pool = Pool(processes=processes)
-
-        for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_a)), disable=tqdm_str == '',
-                               desc=(tqdm_str + ' (1/2)'), dynamic_ncols=True):
-            nni = pool.map(inten_sat_compact, args_list[batch_idx0:batch_idx0 + batch_size])
-            for ni in nni:
-                NN_a += ni
-            del nni
-
-        for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_a)), disable=tqdm_str == '',
-                               desc=(tqdm_str + ' (2/2)'), dynamic_ncols=True):
-            wi_list = pool.map(noise_extract_compact, args_list[batch_idx0:batch_idx0 + batch_size])
-            for wi in wi_list:
-                RPsum_a += wi
-            del wi_list
+        RPsum_a, NN_a = multiprocess_get_sum_and_nn(block_a, args_list, processes, batch_size, tqdm_str)
 
         # Second half of imgs
-        RPsum_b = np.zeros((h, w, ch), np.float32)
-        NN_b = np.zeros((h, w, ch), np.float32)
         block_b = imgs[int(len(imgs) / 2):]
         args_list = [(im, levels, sigma) for im in block_b]
-        pool = Pool(processes=processes)
-
-        for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_b)), disable=tqdm_str == '',
-                               desc=(tqdm_str + ' (1/2)'), dynamic_ncols=True):
-            nni = pool.map(inten_sat_compact, args_list[batch_idx0:batch_idx0 + batch_size])
-            for ni in nni:
-                NN_b += ni
-            del nni
-
-        for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(block_b)), disable=tqdm_str == '',
-                               desc=(tqdm_str + ' (2/2)'), dynamic_ncols=True):
-            wi_list = pool.map(noise_extract_compact, args_list[batch_idx0:batch_idx0 + batch_size])
-            for wi in wi_list:
-                RPsum_b += wi
-            del wi_list
-        pool.close()
+        RPsum_b, NN_b = multiprocess_get_sum_and_nn(block_b, args_list, processes, batch_size, tqdm_str)
 
     else:  # Single process
         # First half
-        block_a = imgs[:int(len(imgs) / 2)]
-        RPsum_a = np.zeros((h, w, ch), np.float32)
-        NN_a = np.zeros((h, w, ch), np.float32)
-        for im in tqdm(block_a, disable=tqdm_str is None, desc="1/2"+tqdm_str, dynamic_ncols=True):
-            RPsum_a += noise_extract_compact((im, levels, sigma))
-            NN_a += (inten_scale(im) * saturation(im)) ** 2
+        RPsum_a, NN_a = get_sum_and_nn(imgs[:int(len(imgs) / 2)], levels, sigma, tqdm_str)
 
         # Second half
-        block_b = imgs[int(len(imgs) / 2):]
-        RPsum_b = np.zeros((h, w, ch), np.float32)
-        NN_b = np.zeros((h, w, ch), np.float32)
-        for im in tqdm(block_b, disable=tqdm_str is None, desc="2/2"+tqdm_str, dynamic_ncols=True):
-            RPsum_b += noise_extract_compact((im, levels, sigma))
-            NN_b += (inten_scale(im) * saturation(im)) ** 2
+        RPsum_b, NN_b = get_sum_and_nn(imgs[int(len(imgs) / 2):], levels, sigma, tqdm_str)
 
     K_a = RPsum_a / (NN_a + 1)
     K_a = rgb2gray(K_a)
     K_a = zero_mean_total(K_a)
     K_a = wiener_dft(K_a, K_a.std(ddof=1)).astype(np.float32)
+
     K_b = RPsum_b / (NN_b + 1)
     K_b = rgb2gray(K_b)
     K_b = zero_mean_total(K_b)
     K_b = wiener_dft(K_b, K_b.std(ddof=1)).astype(np.float32)
+
     pce = prnu.pce(prnu.crosscorr_2d(K_a, K_b))['pce']
-    if pce < 60:
-        print("Warning: low PCE found:", pce)
-    else:
-        print("PCE:", pce)
 
     RPsum = RPsum_a + RPsum_b
     NN = NN_a + NN_b
@@ -165,7 +153,7 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     K = rgb2gray(K)
     K = zero_mean_total(K)
     K = wiener_dft(K, K.std(ddof=1)).astype(np.float32)
-    return K
+    return K, pce
 
 
 def procedure(video_path: str):
@@ -200,7 +188,12 @@ def procedure(video_path: str):
         end = seq[i] + 4
         f = extract_frames(mp4file, list(range(seq[i], end)))
         print("Computing fingerprint..")
-        clips_fingerprints_k.append(extract_and_test_multiple_aligned(f, processes=threads_count))
+        K, pce = extract_and_test_multiple_aligned(f, processes=threads_count)
+        if pce < 60:
+            print("Warning: low PCE found:", pce)
+        else:
+            print("PCE:", pce)
+        clips_fingerprints_k.append(K)
 
     print("Cross-correlation")
     aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']

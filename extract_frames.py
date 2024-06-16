@@ -3,6 +3,7 @@ import os
 import glob
 import cv2
 from PIL import Image
+from tqdm import tqdm
 
 
 def extract_frame(video_capture, frame_number):
@@ -28,7 +29,7 @@ def sequence_from_groundtruth(video_capture):
 
 
 def extract_frames(video_cap, sequence):
-    return [extract_frame(video_cap, f)[1] for f in sequence]
+    return [extract_frame(video_cap, f)[1] for f in tqdm(sequence)]
 
 
 def export_pngs(video_file):

@@ -126,11 +126,10 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     return K, pce
 
 
-def procedure(video_path: str):
+def procedure(video_path: str, threads_count = os.cpu_count() - 2):
     if os.path.isdir(video_path.replace(".mp4", "/")):
         print("Skipping", video_path + ". Results already exist.")
         return
-    threads_count = os.cpu_count() - 2
 
     mp4file = cv2.VideoCapture(video_path)
     fps = int(mp4file.get(cv2.CAP_PROP_FPS))

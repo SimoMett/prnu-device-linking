@@ -14,7 +14,7 @@ from scene_detect import sequence_from_scenedetect
 
 
 def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float = 5, processes: int = None,
-                                      batch_size=os.cpu_count(), tqdm_str: str = '') -> np.ndarray:
+                                      batch_size=os.cpu_count(), tqdm_str: str = '') -> (np.ndarray, float):
     """
     @author: Luca Bondi (luca.bondi@polimi.it)
     @author: Paolo Bestagini (paolo.bestagini@polimi.it)
@@ -123,7 +123,7 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     K = rgb2gray(K)
     K = zero_mean_total(K)
     K = wiener_dft(K, K.std(ddof=1)).astype(np.float32)
-    return K
+    return K, pce
 
 
 def procedure(video_path: str):
@@ -140,18 +140,19 @@ def procedure(video_path: str):
     seq = [0, tot_frames]
 
     # fingerprint
+    results = []
     for i in range(len(seq) - 1):
         print("Extracting..")
         max_frames = 500
         f = extract_frames(mp4file, list(range(seq[i], seq[i + 1]))[:max_frames])
-        extract_and_test_multiple_aligned(f[:40], processes=threads_count)
-        extract_and_test_multiple_aligned(f[:80], processes=threads_count)
-        extract_and_test_multiple_aligned(f[:100], processes=threads_count)
-        extract_and_test_multiple_aligned(f[:200], processes=threads_count)
-        extract_and_test_multiple_aligned(f[:400], processes=threads_count)
-        extract_and_test_multiple_aligned(f, processes=threads_count)
+        results.append(extract_and_test_multiple_aligned(f[:40], processes=threads_count)[1])
+        results.append(extract_and_test_multiple_aligned(f[:80], processes=threads_count)[1])
+        results.append(extract_and_test_multiple_aligned(f[:100], processes=threads_count)[1])
+        results.append(extract_and_test_multiple_aligned(f[:200], processes=threads_count)[1])
+        results.append(extract_and_test_multiple_aligned(f[:400], processes=threads_count)[1])
+        results.append(extract_and_test_multiple_aligned(f, processes=threads_count)[1])
 
-    return
+    return results
 
 
 if __name__ == "__main__":

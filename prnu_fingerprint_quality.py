@@ -151,7 +151,7 @@ def procedure(video_path: str, threads_count=os.cpu_count() - 2):
         results.append(extract_and_test_multiple_aligned(f[:400], processes=threads_count)[1])
         results.append(extract_and_test_multiple_aligned(f, processes=threads_count)[1])
 
-    return results
+    return [int(r) for r in results]  # rounding (I don't want a 13 digits float value)
 
 
 if __name__ == "__main__":

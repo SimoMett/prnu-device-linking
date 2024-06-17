@@ -5,7 +5,7 @@ import os
 
 import params
 
-general_regex = "_.*/Nat/jpeg-h264/L./S./.*(.MOV|.mp4)"
+general_regex = "_.*/Nat/jpeg-h264/L./S./.*(.MOV|.mp4|.3gp)"
 floreview_url = "https://lesc.dinfo.unifi.it/FloreView/"
 
 

@@ -13,3 +13,5 @@ if __name__ == "__main__":
         save_results(s, procedure(s))
     for s in glob.glob(base_str+".MOV"):
         save_results(s, procedure(s))
+    for s in glob.glob(base_str+".3gp"):
+        save_results(s, procedure(s))

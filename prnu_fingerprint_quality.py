@@ -113,8 +113,6 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     pce = prnu.pce(prnu.crosscorr_2d(K_a, K_b))['pce']
     if pce < 60:
         print("Warning: low PCE found:", pce)
-    else:
-        print("PCE:", pce)
 
     RPsum = RPsum_a + RPsum_b
     NN = NN_a + NN_b
@@ -144,12 +142,10 @@ def procedure(video_path: str, threads_count=os.cpu_count() - 2):
         print("Extracting..")
         max_frames = 500
         f = extract_frames(mp4file, list(range(seq[i], seq[i + 1]))[:max_frames])
-        results.append(extract_and_test_multiple_aligned(f[:40], processes=threads_count)[1])
-        results.append(extract_and_test_multiple_aligned(f[:80], processes=threads_count)[1])
-        results.append(extract_and_test_multiple_aligned(f[:100], processes=threads_count)[1])
-        results.append(extract_and_test_multiple_aligned(f[:200], processes=threads_count)[1])
-        results.append(extract_and_test_multiple_aligned(f[:400], processes=threads_count)[1])
-        results.append(extract_and_test_multiple_aligned(f, processes=threads_count)[1])
+        steps = [max_frames, 400, 200, 100, 80, 40]
+        for s in steps:
+            f = f[:s]
+            results.insert(0, extract_and_test_multiple_aligned(f, processes=threads_count)[1])
 
     return [int(r) for r in results]  # rounding (I don't want a 13 digits float value)
 

@@ -8,10 +8,13 @@ def save_results(file, pce: list):
 
 
 if __name__ == "__main__":
-    base_str = "Dataset/D*/Nat/jpeg-h264/L5/S2/*"
-    for s in glob.glob(base_str+".mp4"):
-        save_results(s, procedure(s))
-    for s in glob.glob(base_str+".MOV"):
-        save_results(s, procedure(s))
-    for s in glob.glob(base_str+".3gp"):
-        save_results(s, procedure(s))
+    good_devices = [38, 16, 5, 27, 29, 9, 4, 18, 3, 28, 45, 6, 8]
+    format_base_str = "Dataset/D{:02d}*/Nat/jpeg-h264/L*/S*/*"
+    for d in good_devices:
+        base_str = format_base_str.format(d)
+        for s in glob.glob(base_str+".mp4"):
+            save_results(s, procedure(s))
+        for s in glob.glob(base_str+".MOV"):
+            save_results(s, procedure(s))
+        for s in glob.glob(base_str+".3gp"):
+            save_results(s, procedure(s))

@@ -9,8 +9,9 @@ def save_results(file, pce: list):
 
 if __name__ == "__main__":
     good_devices = [38, 16, 5, 27, 29, 9, 4, 18, 3, 28, 45, 6, 8]
-    format_base_str = "Dataset/D{:02d}*/Nat/jpeg-h264/L*/S*/*"
-    for d in good_devices:
+    all_devices = list(range(1,47))
+    format_base_str = "Dataset/D{:02d}*/Nat/jpeg-h264/L5/S2/*"
+    for d in [dev for dev in all_devices if dev not in good_devices]:
         base_str = format_base_str.format(d)
         for s in glob.glob(base_str+".mp4"):
             save_results(s, procedure(s))

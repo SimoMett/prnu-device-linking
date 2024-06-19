@@ -134,7 +134,7 @@ def procedure(video_path: str, threads_count=os.cpu_count() - 2):
     tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
     print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
     # seq = sequence_from_scenedetect(video_path)
-    seq = [0, tot_frames]
+    seq = [fps, tot_frames]  # removing frames of the first second
 
     # fingerprint
     results = []

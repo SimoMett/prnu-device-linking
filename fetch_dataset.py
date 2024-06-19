@@ -5,16 +5,19 @@ import os
 
 import params
 
-general_regex = "_.*/Nat/jpeg-h264/L./S./.*(.MOV|.mp4|.3gp)"
+floreview_regex = "_.*/Nat/jpeg-h264/L./S./.*(.MOV|.mp4|.3gp)"
 floreview_url = "https://lesc.dinfo.unifi.it/FloreView/"
+vision_url = "https://lesc.dinfo.unifi.it/VISION/"
+vision_index = "VISION_files.txt"
+vision_regex = "_.*/videos/(outdoor|indoor)/.*(.mov|.mp4|.3gp)"
 
 
-def fetch_dataset(devices: list):
+def fetch_dataset(base_url: str, index_file: str, general_regex: str, devices: list, dest_folder: str):
     for did in devices:
         assert type(did) is int
 
     # read all the urls
-    content = urllib.request.urlopen(floreview_url + "FloreView_Dataset.txt").read().decode()
+    content = urllib.request.urlopen(base_url + index_file).read().decode()
 
     # generate accepting regex and filter the correct files to download
     devices_formula = "D(" + "|".join(["{:02d}".format(d) for d in devices]) + ")"
@@ -24,7 +27,7 @@ def fetch_dataset(devices: list):
     # make dirs and download the files
     for url in url_list:
         print("Downloading", url)
-        file_dest = url.replace(floreview_url, "")
+        file_dest = url.replace(base_url, dest_folder)
         if os.path.exists(file_dest):
             print("Skipping. Already exists")
             continue
@@ -38,4 +41,4 @@ def fetch_dataset(devices: list):
 
 if __name__ == "__main__":
     for s in params.sequences:
-        fetch_dataset(list(set(s)))
+        fetch_dataset(floreview_url, "FloreView_Dataset.txt", floreview_regex, list(set(s)), "")

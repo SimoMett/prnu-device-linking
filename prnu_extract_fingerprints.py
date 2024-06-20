@@ -64,6 +64,7 @@ def multiprocess_get_sum_and_nn(imgs, args_list, processes, batch_size, tqdm_str
     for batch_idx0 in tqdm(np.arange(start=0, step=batch_size, stop=len(imgs)), disable=tqdm_str == '',
                            desc=(tqdm_str + ' (1/2)'), dynamic_ncols=True):
         nni = pool.map(inten_sat_compact, args_list[batch_idx0:batch_idx0 + batch_size])
+        # Do not use np.sum over axis=0. It's slower
         for ni in nni:
             NN += ni
         del nni
@@ -134,13 +135,11 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
         # Second half
         RPsum_b, NN_b = get_sum_and_nn(imgs[int(len(imgs) / 2):], levels, sigma, tqdm_str)
 
-    K_a = RPsum_a / (NN_a + 1)
-    K_a = rgb2gray(K_a)
+    K_a = rgb2gray(RPsum_a / (NN_a + 1))
     K_a = zero_mean_total(K_a)
     K_a = wiener_dft(K_a, K_a.std(ddof=1)).astype(np.float32)
 
-    K_b = RPsum_b / (NN_b + 1)
-    K_b = rgb2gray(K_b)
+    K_b = rgb2gray(RPsum_b / (NN_b + 1))
     K_b = zero_mean_total(K_b)
     K_b = wiener_dft(K_b, K_b.std(ddof=1)).astype(np.float32)
 

@@ -11,7 +11,7 @@ def extract_frame(video_capture, frame_number):
 
     mp4file.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
     res, frame = mp4file.read()
-    return res, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    return res, frame
 
 # deprecated
 def sequence_from_groundtruth(video_capture):

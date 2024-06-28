@@ -51,6 +51,13 @@ def concatenate_videos(videos: list, output: str):
 
 
 def get_video_path(device, l, s):
+    base_path = "Hybrid Dataset/"
+    paths = [base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mp4",
+             base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.MOV",
+             base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mov",
+             base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.3gp",
+             base_path + "D{:02d}".format(device) + "videos/outdoor/"
+             ]
     result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mp4")
     if not result:
         result = glob.glob(

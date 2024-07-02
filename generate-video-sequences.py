@@ -17,10 +17,7 @@ def extract_clip(input_file: str, output: str, start=0, duration=10):
 
 # This function was a pain in the arse
 # I'll try to doc it
-def concatenate_videos(videos: list, output: str):
-    default_start = 0
-    default_duration = 10
-
+def concatenate_videos(videos: list, output: str, default_start=0, default_duration=10):
     # For each video sources I have to trim the video and create a split filter using 'filter_multi_output'
     # and then count every stream occurrence used during encoding process to avoid using the same stream multiple times
     # (otherwise I'll get the error "ValueError: encountered trim with multiple outgoing edges...")
@@ -51,18 +48,22 @@ def concatenate_videos(videos: list, output: str):
 def get_clips_paths(device, base_path):
     paths = [base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L*/S*/*",
              base_path + "D{:02d}".format(device) + "_*/videos/outdoor/*"
+             # base_path + "D{:02d}".format(device) + "_*/videos/indoor/*"
              ]
     file_formats = [".mp4", ".MOV", ".mov", ".3gp"]
     result = []
     for p in paths:
         for ff in file_formats:
-            result += glob.glob(p+ff)
+            result += glob.glob(p + ff)
     return result
 
 
 def generate_video_sequences(seq, max_index, base_path):
     for i in range(max_index):
-        output_name = base_path + "output/Video_Seq" + str(sequences.index(seq)+1) + "_" + str(i)+".mp4"
+        output_name = base_path + "output/Video_Seq" + str(sequences.index(seq) + 1) + "_" + str(i) + ".mp4"
+        if os.path.isfile(output_name):
+            print("Skipping already present", output_name)
+            continue
         video_clips = []
         for dev in seq:
             paths = sorted(get_clips_paths(dev, base_path))

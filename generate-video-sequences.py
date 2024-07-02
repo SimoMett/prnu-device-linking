@@ -1,5 +1,3 @@
-import sys
-
 import ffmpeg
 import glob
 import os
@@ -50,53 +48,38 @@ def concatenate_videos(videos: list, output: str):
     os.rename(partial_output, output)
 
 
-def get_video_path(device, l, s):
-    base_path = "Hybrid Dataset/"
-    paths = [base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mp4",
-             base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.MOV",
-             base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mov",
-             base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.3gp",
-             base_path + "D{:02d}".format(device) + "videos/outdoor/"
+def get_clips_paths(device, base_path):
+    paths = [base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L*/S*/*",
+             base_path + "D{:02d}".format(device) + "_*/videos/outdoor/*"
              ]
-    result = glob.glob("Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.mp4")
-    if not result:
-        result = glob.glob(
-            "Dataset/D" + "{:02d}".format(device) + "_*/Nat/jpeg-h264/L" + str(l) + "/S" + str(s) + "/*.MOV")
-    # assert len(result) == 1
+    file_formats = [".mp4", ".MOV", ".mov", ".3gp"]
+    result = []
+    for p in paths:
+        for ff in file_formats:
+            result += glob.glob(p+ff)
     return result
 
 
-def generate_video_sequence(sequence, l, s, output: str):
-    print("Generating", output + ":")
-    assert l != 0 and s != 0
-
-    file_paths = [get_video_path(e, l, s)[0] if get_video_path(e, l, s) != [] else None for e in sequence]
-    if None in file_paths:
-        print("Skipping. Missing file")
-        return
-    if os.path.isfile(output):
-        print("Skipping. Valid", output, "already exists")
-        return
-    concatenate_videos(file_paths, output)
+def generate_video_sequences(seq, max_index, base_path):
+    for i in range(max_index):
+        output_name = base_path + "output/Video_Seq" + str(sequences.index(seq)+1) + "_" + str(i)+".mp4"
+        video_clips = []
+        for dev in seq:
+            paths = sorted(get_clips_paths(dev, base_path))
+            video_clips.append(paths[i % len(paths)])
+        concatenate_videos(video_clips, output_name)
+        save_dataset_info(base_path, output_name, video_clips)
     return
 
 
-def main():
-    for d in range(brand_devices_cnt):
-        for l in range(1, locations_cnt + 1):
-            for s in range(1, samples_cnt + 1):
-                output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
-                generate_video_sequence(sequences[d], l, s, output)
-    return
+def save_dataset_info(base_path, output_name, video_clips):
+    with open("dataset_info.csv", "a") as f:
+        f.write(",".join([output_name] + [v.removeprefix(base_path) for v in video_clips]) + "\n")
 
 
 if __name__ == "__main__":
-    os.makedirs("output", exist_ok=True)
-    if len(sys.argv) == 4:
-        d = int(sys.argv[1])
-        l = int(sys.argv[2])
-        s = int(sys.argv[3])
-        output = "output/Seq{:d}_Clip_L{:02d}S{:02d}.mp4".format(d + 1, l, s)
-        generate_video_sequence(sequences[d], l, s, output)
-    else:
-        main()
+    os.makedirs("Hybrid Dataset/output", exist_ok=True)
+    max_index = 34
+    base_path = "Hybrid Dataset/"
+    for seq in sequences:
+        generate_video_sequences(seq, max_index, base_path)

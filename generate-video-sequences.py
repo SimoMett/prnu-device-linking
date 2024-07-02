@@ -4,17 +4,6 @@ import os
 from params import *
 
 
-# extract clip WITHOUT audio, but for the purpose of this project it's fine
-def extract_clip(input_file: str, output: str, start=0, duration=10):
-    (
-        ffmpeg
-        .input(input_file)
-        .trim(start=start, duration=duration)
-        .output(output)
-        .run()
-    )
-
-
 # This function was a pain in the arse
 # I'll try to doc it
 def concatenate_videos(videos: list, output: str, default_start=0, default_duration=10):
@@ -26,6 +15,7 @@ def concatenate_videos(videos: list, output: str, default_start=0, default_durat
     for v in splits_map.keys():
         assert os.path.isfile(v)
         splits_map[v] = (
+            # extract clip WITHOUT audio, but for the purpose of this project it's fine
             [ffmpeg.input(v).trim(start=default_start, end=default_duration).filter_multi_output("split"), 0])
 
     # Now I build the clips sequence allocating the streams of each sources
@@ -40,6 +30,7 @@ def concatenate_videos(videos: list, output: str, default_start=0, default_durat
         ffmpeg.concat(*[c.filter("scale", "1920-1080").filter("setsar", "1-1") for c in clips])
         .output(partial_output)
         .overwrite_output()
+        .global_args('-hwaccel', 'auto')
         .run()
     )
     os.rename(partial_output, output)

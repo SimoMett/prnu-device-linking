@@ -16,7 +16,7 @@ def concatenate_videos(videos: list, output: str, default_start=0, default_durat
         assert os.path.isfile(v)
         splits_map[v] = (
             # extract clip WITHOUT audio, but for the purpose of this project it's fine
-            [ffmpeg.input(v).trim(start=default_start, end=default_duration).filter_multi_output("split"), 0])
+            [ffmpeg.input(v, vcodec="h264_cuvid").trim(start=default_start, end=default_duration).filter_multi_output("split"), 0])
 
     # Now I build the clips sequence allocating the streams of each sources
     clips = []
@@ -28,9 +28,8 @@ def concatenate_videos(videos: list, output: str, default_start=0, default_durat
     partial_output = output.replace(".mp4", ".partial.mp4")
     (
         ffmpeg.concat(*[c.filter("scale", "1920-1080").filter("setsar", "1-1") for c in clips])
-        .output(partial_output)
+        .output(partial_output, vcodec="h264_nvenc")
         .overwrite_output()
-        .global_args('-hwaccel', 'auto')
         .run()
     )
     os.rename(partial_output, output)

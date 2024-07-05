@@ -26,20 +26,22 @@ def save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce):
     output_path = video_path.replace(".mp4", "/")
     os.makedirs(output_path, exist_ok=True)
 
-    with open(output_path + "aligned_cc.csv", "w") as output_file:
-        for row in aligned_cc:
-            output_file.write(",".join(("{:.1f}".format(i) for i in row)) + "\n")
+    if aligned_cc is not None:
+        with open(output_path + "aligned_cc.csv", "w") as output_file:
+            for row in aligned_cc:
+                output_file.write(",".join(("{:.1f}".format(i) for i in row)) + "\n")
 
     with open(output_path + "pce.csv", "w") as output_file:
         for row in pce_rot:
             output_file.write(",".join(("{:.1f}".format(i) for i in row)) + "\n")
 
-    with open(output_path + "stats_cc.csv", "w") as output_file:
-        output_file.write("TPR:," + ",".join((str(i) for i in stats_cc['tpr'])) + "\n")
-        output_file.write("FPR:," + ",".join((str(i) for i in stats_cc['fpr'])) + "\n")
-        output_file.write("TH:," + ",".join((str(i) for i in stats_cc['th'])) + "\n")
-        output_file.write("AUC:," + str(stats_cc['auc']) + "\n")
-        output_file.write("EER:," + str(stats_cc['eer']) + "\n")
+    if stats_cc is not None:
+        with open(output_path + "stats_cc.csv", "w") as output_file:
+            output_file.write("TPR:," + ",".join((str(i) for i in stats_cc['tpr'])) + "\n")
+            output_file.write("FPR:," + ",".join((str(i) for i in stats_cc['fpr'])) + "\n")
+            output_file.write("TH:," + ",".join((str(i) for i in stats_cc['th'])) + "\n")
+            output_file.write("AUC:," + str(stats_cc['auc']) + "\n")
+            output_file.write("EER:," + str(stats_cc['eer']) + "\n")
 
     with open(output_path + "stats_pce.csv", "w") as output_file:
         output_file.write("TPR:," + ",".join((str(i) for i in stats_pce['tpr'])) + "\n")
@@ -155,7 +157,7 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     return K, pce
 
 
-def procedure(video_path: str):
+def procedure(video_path: str, threads_count, frames_count=4):
     if os.path.isdir(video_path.replace(".mp4", "/")):
         print("Skipping", video_path + ". Results already exist.")
         return
@@ -171,37 +173,37 @@ def procedure(video_path: str):
     clips_seq = params.sequences[seq_idx]
     ground_truth = prnu.gt(clips_seq, clips_seq)
 
-    print("Extracting residuals from chosen samples")
-    samples = extract_frames(mp4file, seq[:-1])
-    pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
-    residuals_w = pool.map(prnu.extract_single, samples)
-    pool.close()
+    # print("Extracting residuals from chosen samples")
+    # samples = extract_frames(mp4file, seq[:-1])
+    # pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
+    # residuals_w = pool.map(prnu.extract_single, samples)
+    # pool.close()
 
     # fingerprint
-    threads_count = cpu_count() - 1 if cpu_count() != 1 else 1
     clips_fingerprints_k = []
 
     for i in range(len(seq) - 1):
         print("Extracting frames from clip", i + 1)
         # end = seq[i + 1]
-        end = seq[i] + 4
+        end = seq[i] + frames_count
+        assert end < seq[i+1]
         f = extract_frames(mp4file, list(range(seq[i], end)))
         print("Computing fingerprint..")
-        K, pce = extract_and_test_multiple_aligned(f, processes=threads_count)
-        if pce < 60:
-            print("Warning: low PCE found:", pce)
+        K, self_pce = extract_and_test_multiple_aligned(f, processes=threads_count, batch_size=threads_count)
+        if self_pce < 60:
+            print("Warning: low PCE found:", self_pce)
         else:
-            print("PCE:", pce)
+            print("PCE:", self_pce)
         clips_fingerprints_k.append(K)
 
-    print("Cross-correlation")
-    aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']
-    stats_cc = prnu.stats(aligned_cc, ground_truth)
+    # print("Cross-correlation")
+    # aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']
+    # stats_cc = prnu.stats(aligned_cc, ground_truth)
 
     print("Peak to correlation energy")
-    pce_rot = compute_pce(clips_fingerprints_k, residuals_w)
+    pce_rot = compute_pce(clips_fingerprints_k, clips_fingerprints_k)
     stats_pce = prnu.stats(pce_rot, ground_truth)
-    save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce)
+    save_results(video_path, None, None, pce_rot, stats_pce)
     return
 
 
@@ -221,4 +223,4 @@ def compute_pce(clips_fingerprints_k, residuals_w):
 
 if __name__ == "__main__":
     for s in sys.argv[1::]:
-        procedure(s)
+        procedure(s, cpu_count() - 2, 200)

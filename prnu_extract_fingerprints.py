@@ -11,7 +11,7 @@ import prnu
 import scene_detect
 from extract_frames import extract_frames
 from prnu import inten_sat_compact, noise_extract_compact, inten_scale, saturation, rgb2gray, zero_mean_total, \
-    wiener_dft
+    wiener_dft, extract_multiple_aligned
 from scene_detect import sequence_from_scenedetect
 
 
@@ -189,11 +189,7 @@ def procedure(video_path: str, threads_count, frames_count=4):
         assert end < seq[i+1]
         f = extract_frames(mp4file, list(range(seq[i], end)))
         print("Computing fingerprint..")
-        K, self_pce = extract_and_test_multiple_aligned(f, processes=threads_count, batch_size=threads_count)
-        if self_pce < 60:
-            print("Warning: low PCE found:", self_pce)
-        else:
-            print("PCE:", self_pce)
+        K = extract_multiple_aligned(f, processes=threads_count, batch_size=threads_count)
         clips_fingerprints_k.append(K)
 
     # print("Cross-correlation")

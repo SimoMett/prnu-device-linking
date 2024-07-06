@@ -37,8 +37,8 @@ def concatenate_videos(videos: list, output: str, default_start=0, default_durat
 
 def get_clips_paths(device, base_path):
     paths = [base_path + "D{:02d}".format(device) + "_*/Nat/jpeg-h264/L*/S*/*",
-             base_path + "D{:02d}".format(device) + "_*/videos/outdoor/*"
-             # base_path + "D{:02d}".format(device) + "_*/videos/indoor/*"
+             base_path + "D{:02d}".format(device) + "_*/videos/outdoor/*",
+             base_path + "D{:02d}".format(device) + "_*/videos/indoor/*"
              ]
     file_formats = [".mp4", ".MOV", ".mov", ".3gp"]
     result = []

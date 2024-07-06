@@ -25,9 +25,9 @@ def procedure(video_path: str, threads_count=os.cpu_count() - 2):
     results = []
     for i in range(len(seq) - 1):
         print("Extracting..")
-        max_frames = 500
+        max_frames = 700
         f = extract_frames(mp4file, list(range(seq[i], seq[i + 1]))[:max_frames])
-        steps = [max_frames, 400, 200, 100, 80, 40]
+        steps = [max_frames, 400, 200, 120, 80]
         for s in steps:
             f = f[:s]
             results.insert(0, extract_and_test_multiple_aligned(f, processes=threads_count)[1])

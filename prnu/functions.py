@@ -355,7 +355,7 @@ def inten_scale(im: np.ndarray) -> np.ndarray:
 
     T = 252
     v = 6
-    out = np.exp(-1 * (im - T) ** 2 / v)
+    out = np.exp(-1 * np.int32(im - T) ** 2 / v)
     out[im < T] = im[im < T] / T
 
     return out

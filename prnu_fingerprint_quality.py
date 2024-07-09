@@ -30,7 +30,7 @@ def procedure(video_path: str, threads_count=os.cpu_count() - 2):
         steps = [max_frames, 400, 200, 120, 80]
         for s in steps:
             f = f[:s]
-            results.insert(0, extract_and_test_multiple_aligned(f, processes=threads_count)[1])
+            results.insert(0, extract_and_test_multiple_aligned(f, processes=threads_count, batch_size=threads_count)[1])
 
     return [int(r) for r in results]  # rounding (I don't want a 13 digits float value)
 

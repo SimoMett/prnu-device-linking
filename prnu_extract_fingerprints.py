@@ -185,7 +185,10 @@ def procedure(video_path: str, threads_count, frames_count=4):
     for i in range(len(seq) - 1):
         print("Extracting frames from clip", i + 1)
         # end = seq[i + 1]
-        end = seq[i] + frames_count
+        if frames_count == 'end':
+            end = seq[i+1]-1
+        else:
+            end = seq[i] + frames_count
         assert end < seq[i+1]
         f = extract_frames(mp4file, list(range(seq[i], end)))
         print("Computing fingerprint..")

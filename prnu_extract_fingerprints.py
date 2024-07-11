@@ -5,6 +5,8 @@ from multiprocessing import Pool, cpu_count
 import cv2
 import numpy as np
 import pickle as pk
+
+from PIL import Image
 from tqdm import tqdm
 import params
 import prnu
@@ -22,8 +24,7 @@ def save_as_pickle(filename: str, object):
     return
 
 
-def save_results(video_path, aligned_cc, stats_cc, pce_rot, stats_pce):
-    output_path = video_path.replace(".mp4", "/")
+def save_results(output_path, aligned_cc, stats_cc, pce_rot, stats_pce):
     os.makedirs(output_path, exist_ok=True)
 
     if aligned_cc is not None:
@@ -157,8 +158,22 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
     return K, pce
 
 
-def procedure(video_path: str, threads_count, frames_count=4):
-    if os.path.isdir(video_path.replace(".mp4", "/")):
+def dump_frames(frames, idx):
+    out_name = "dumped_frames_seq"+str(idx)
+    os.makedirs(out_name, exist_ok=True)
+    for i, f in enumerate(frames):
+        filename = out_name + "/frame" + str(i) + ".png"
+        png_image = Image.fromarray(f, mode="RGB")
+        png_image.save(filename)
+    pass
+
+
+def procedure(video_path: str, threads_count, frames_count):
+    if frames_count == "end":
+        dest_path = video_path.replace(".mp4", "/")
+    else:
+        dest_path = video_path.replace(".mp4", "_"+str(frames_count)+"frames/")
+    if os.path.isdir(dest_path):
         print("Skipping", video_path + ". Results already exist.")
         return
 
@@ -172,12 +187,6 @@ def procedure(video_path: str, threads_count, frames_count=4):
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1
     clips_seq = params.sequences[seq_idx]
     ground_truth = prnu.gt(clips_seq, clips_seq)
-
-    # print("Extracting residuals from chosen samples")
-    # samples = extract_frames(mp4file, seq[:-1])
-    # pool = Pool(os.cpu_count() - 1 if os.cpu_count() != 1 else 1)
-    # residuals_w = pool.map(prnu.extract_single, samples)
-    # pool.close()
 
     # fingerprint
     clips_fingerprints_k = []
@@ -202,7 +211,7 @@ def procedure(video_path: str, threads_count, frames_count=4):
     print("Peak to correlation energy")
     pce_rot = compute_pce(clips_fingerprints_k, clips_fingerprints_k)
     stats_pce = prnu.stats(pce_rot, ground_truth)
-    save_results(video_path, None, None, pce_rot, stats_pce)
+    save_results(dest_path, None, None, pce_rot, stats_pce)
     return
 
 
@@ -222,4 +231,4 @@ def compute_pce(clips_fingerprints_k, residuals_w):
 
 if __name__ == "__main__":
     for s in sys.argv[1::]:
-        procedure(s, cpu_count() - 2, 200)
+        procedure(s, cpu_count() - 1, 'end')

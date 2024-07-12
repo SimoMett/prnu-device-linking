@@ -8,13 +8,18 @@ import pickle as pk
 
 from PIL import Image
 from tqdm import tqdm
-import params
 import prnu
 import scene_detect
 from extract_frames import extract_frames
 from prnu import inten_sat_compact, noise_extract_compact, inten_scale, saturation, rgb2gray, zero_mean_total, \
     wiener_dft, extract_multiple_aligned
 from scene_detect import sequence_from_scenedetect
+
+devs_sequences = [
+    (1, 7, 1, 3, 1, 29, 1, 27, 1, 38),
+    (2, 8, 2, 5, 2, 28, 2, 18, 2, 4)
+    #A  L  A  H  A   M  A   S  A  X
+]
 
 
 def save_as_pickle(filename: str, object):
@@ -185,7 +190,7 @@ def procedure(video_path: str, threads_count, frames_count):
 
     # ground truth
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1
-    clips_seq = params.sequences[seq_idx]
+    clips_seq = devs_sequences[seq_idx]
     ground_truth = prnu.gt(clips_seq, clips_seq)
 
     # fingerprint

@@ -2,8 +2,7 @@ import urllib.request
 import re
 import requests
 import os
-
-import params
+import prnu_extract_fingerprints
 
 floreview_regex = "_.*/Nat/jpeg-h264/L./S./.*(.MOV|.mp4|.3gp)"
 floreview_url = "https://lesc.dinfo.unifi.it/FloreView/"
@@ -40,5 +39,5 @@ def fetch_dataset(base_url: str, index_file: str, general_regex: str, devices: l
 
 
 if __name__ == "__main__":
-    for s in params.sequences:
+    for s in prnu_extract_fingerprints.devs_sequences:
         fetch_dataset(floreview_url, "FloreView_Dataset.txt", floreview_regex, list(set(s)), "")

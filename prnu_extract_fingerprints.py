@@ -164,7 +164,7 @@ def extract_and_test_multiple_aligned(imgs: list, levels: int = 4, sigma: float 
 
 
 def dump_frames(frames, idx):
-    out_name = "dumped_frames_seq"+str(idx)
+    out_name = "dumped_frames_seq" + str(idx)
     os.makedirs(out_name, exist_ok=True)
     for i, f in enumerate(frames):
         filename = out_name + "/frame" + str(i) + ".png"
@@ -177,7 +177,7 @@ def procedure(video_path: str, threads_count, frames_count):
     if frames_count == "end":
         dest_path = video_path.replace(".mp4", "/")
     else:
-        dest_path = video_path.replace(".mp4", "_"+str(frames_count)+"frames/")
+        dest_path = video_path.replace(".mp4", "_" + str(frames_count) + "frames/")
     if os.path.isdir(dest_path):
         print("Skipping", video_path + ". Results already exist.")
         return
@@ -186,9 +186,13 @@ def procedure(video_path: str, threads_count, frames_count):
     fps = int(mp4file.get(cv2.CAP_PROP_FPS))
     tot_frames = int(mp4file.get(cv2.CAP_PROP_FRAME_COUNT))
     print(video_path + ": Fps:", str(fps) + ", frames count:", tot_frames)
-    seq = sequence_from_scenedetect(video_path)
+    try:
+        seq = sequence_from_scenedetect(video_path)
+    except RuntimeError as e:
+        print("Error during scene detect. Skipping..")
+        return
 
-    # ground truth
+        # ground truth
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1
     clips_seq = devs_sequences[seq_idx]
     ground_truth = prnu.gt(clips_seq, clips_seq)
@@ -200,10 +204,10 @@ def procedure(video_path: str, threads_count, frames_count):
         print("Extracting frames from clip", i + 1)
         # end = seq[i + 1]
         if frames_count == 'end':
-            end = seq[i+1]-1
+            end = seq[i + 1] - 1
         else:
             end = seq[i] + frames_count
-        assert end < seq[i+1]
+        assert end < seq[i + 1]
         f = extract_frames(mp4file, list(range(seq[i], end)))
         print("Computing fingerprint..")
         K = extract_multiple_aligned(f, processes=threads_count, batch_size=threads_count)

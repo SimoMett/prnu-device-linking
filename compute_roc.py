@@ -9,7 +9,6 @@ def get_roc_stats_by_threshold(ground_truth, pce_rot, threshold):
     fp, tp, fn, tn = 0, 0, 0, 0
     for j in range(pce_rot.shape[0]):
         for i in range(j, pce_rot.shape[1] - 1):
-            print(int(pce_rot[i, j]), ground_truth[i, j])
             if pce_rot[i, j] > threshold:
                 if ground_truth[i, j]:
                     tp += 1

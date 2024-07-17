@@ -5,7 +5,8 @@ from scenedetect import detect, ContentDetector, AdaptiveDetector
 
 def sequence_from_scenedetect(video_path):
     scene_list = detect(video_path, AdaptiveDetector(adaptive_threshold=2.73, weights=ContentDetector.Components(1.1, 1, 1, 1.3), min_scene_len=230))
-    assert is_valid_seq(scene_list)
+    if not is_valid_seq(scene_list):
+        raise RuntimeError("Invalid scenedetect sequence")
     return [0] + [e[1].frame_num for e in scene_list]
 
 
@@ -22,7 +23,6 @@ def is_valid_seq(scene_list):
 
 if __name__ == "__main__":
     videos = ["output/" + str(v) for v in os.listdir("output")]
-    videos.remove("output/Seq2_Clip_L04S03.mp4")  # FIXME this video is not rendered correctly
     for v in videos:
         print(v)
         if ".mp4" not in v:

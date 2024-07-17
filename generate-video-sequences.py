@@ -1,7 +1,7 @@
 import ffmpeg
 import glob
 import os
-from params import *
+import prnu_extract_fingerprints
 
 
 # This function was a pain in the arse
@@ -50,7 +50,7 @@ def get_clips_paths(device, base_path):
 
 def generate_video_sequences(seq, max_index, base_path):
     for i in range(max_index):
-        output_name = base_path + "output/Video_Seq" + str(sequences.index(seq) + 1) + "_" + str(i) + ".mp4"
+        output_name = base_path + "output/Video_Seq" + str(prnu_extract_fingerprints.devs_sequences.index(seq) + 1) + "_" + str(i) + ".mp4"
         if os.path.isfile(output_name):
             print("Skipping already present", output_name)
             continue
@@ -72,5 +72,5 @@ if __name__ == "__main__":
     os.makedirs("Hybrid Dataset/output", exist_ok=True)
     max_index = 34
     base_path = "Hybrid Dataset/"
-    for seq in sequences:
+    for seq in prnu_extract_fingerprints.devs_sequences:
         generate_video_sequences(seq, max_index, base_path)

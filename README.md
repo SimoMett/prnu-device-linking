@@ -1,5 +1,5 @@
 # Istruzioni d'uso
-- Modificare i parametri nel modulo [params.py](params.py)
+- Modificare i parametri nel modulo [prnu_extract_fingerprints.py](prnu_extract_fingerprints.py)
 - Eseguire [fetch-dataset-py](fetch_dataset.py) per scaricare il dataset originario da https://lesc.dinfo.unifi.it/FloreView/
 - Eseguire [generate-video-sequences.py](generate-video-sequences.py) per generare le sequenze video
 - Per ogni video generato eseguire lo script [prnu-extract-fingerprints.py](prnu_extract_fingerprints.py) usando la sintassi `python prnu_extract_fingerprints.py <file.mp4>`.  

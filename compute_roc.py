@@ -1,8 +1,8 @@
 import pickle
 import matplotlib.pyplot as plt
 
-import params
 import prnu
+import prnu_extract_fingerprints
 
 with open("Hybrid Dataset/output/Video_Seq1_0/full_results.pickle", "rb") as file:
     _, _, pce_rot, stats = pickle.load(file)
@@ -13,7 +13,7 @@ with open("Hybrid Dataset/output/Video_Seq1_0/full_results.pickle", "rb") as fil
     plt.xlabel('False Positive Rate')
     plt.show()
 
-    clips_seq = params.sequences[1]
+    clips_seq = prnu_extract_fingerprints.sequences[1]
     ground_truth = prnu.gt(clips_seq, clips_seq)
 
     threshold = 40

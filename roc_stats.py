@@ -44,11 +44,12 @@ if __name__ == "__main__":
             clips_seq = prnu_extract_fingerprints.devs_sequences[1]
             ground_truth = prnu.gt(clips_seq, clips_seq)
 
-            fp, tp, fn, tn = get_roc_stats_by_threshold(ground_truth, pce_rot, 60)
+            threshold = 60
+            fp, tp, fn, tn = get_roc_stats_by_threshold(ground_truth, pce_rot, threshold)
             print("FPR:", fp / (fp + tn), "TPR:", tp / (tp + fn))
-            with open(pkl.replace("full_results.pickle", "fpr-tpr-60.csv"), "w") as csv:
+            with open(pkl.replace("full_results.pickle", "fpr-tpr-"+str(threshold)+".csv"), "w") as csv:
                 csv.write("FPR, " + str(fp / (fp + tn)) + "\nTPR, " + str(tp / (tp + fn)))
-            with open("Hybrid Dataset/output/full_fpr_tpr_60.csv", "a") as csv:
+            with open("Hybrid Dataset/output/full_fpr_tpr_"+str(threshold)+".csv", "a") as csv:
                 csv.write(pkl.removeprefix("Hybrid Dataset/output/").removesuffix("/full_results.pickle") +
                           ", {:.2f}".format(fp / (fp + tn)) +
                           ", {:.2f}\n".format(tp / (tp + fn)))

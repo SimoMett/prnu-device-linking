@@ -43,18 +43,18 @@ def save_results(output_path, aligned_cc, stats_cc, pce_rot, stats_pce):
 
     if stats_cc is not None:
         with open(output_path + "stats_cc.csv", "w") as output_file:
-            output_file.write("TPR:," + ",".join((str(i) for i in stats_cc['tpr'])) + "\n")
-            output_file.write("FPR:," + ",".join((str(i) for i in stats_cc['fpr'])) + "\n")
-            output_file.write("TH:," + ",".join((str(i) for i in stats_cc['th'])) + "\n")
-            output_file.write("AUC:," + str(stats_cc['auc']) + "\n")
-            output_file.write("EER:," + str(stats_cc['eer']) + "\n")
+            output_file.write("TPR," + ",".join((str(i) for i in stats_cc['tpr'])) + "\n")
+            output_file.write("FPR," + ",".join((str(i) for i in stats_cc['fpr'])) + "\n")
+            output_file.write("TH," + ",".join((str(i) for i in stats_cc['th'])) + "\n")
+            output_file.write("AUC," + str(stats_cc['auc']) + "\n")
+            output_file.write("EER," + str(stats_cc['eer']) + "\n")
 
     with open(output_path + "stats_pce.csv", "w") as output_file:
-        output_file.write("TPR:," + ",".join((str(i) for i in stats_pce['tpr'])) + "\n")
-        output_file.write("FPR:," + ",".join((str(i) for i in stats_pce['fpr'])) + "\n")
-        output_file.write("TH:," + ",".join((str(i) for i in stats_pce['th'])) + "\n")
-        output_file.write("AUC:," + str(stats_pce['auc']) + "\n")
-        output_file.write("EER:," + str(stats_pce['eer']) + "\n")
+        output_file.write("TPR," + ",".join((str(i) for i in stats_pce['tpr'])) + "\n")
+        output_file.write("FPR," + ",".join((str(i) for i in stats_pce['fpr'])) + "\n")
+        output_file.write("TH," + ",".join((str(i) for i in stats_pce['th'])) + "\n")
+        output_file.write("AUC," + str(stats_pce['auc']) + "\n")
+        output_file.write("EER," + str(stats_pce['eer']) + "\n")
 
     save_as_pickle(output_path + "full_results.pickle", (aligned_cc, stats_cc, pce_rot, stats_pce))
 

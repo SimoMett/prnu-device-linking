@@ -47,5 +47,8 @@ if __name__ == "__main__":
             fp, tp, fn, tn = get_roc_stats_by_threshold(ground_truth, pce_rot, 60)
             print("FPR:", fp / (fp + tn), "TPR:", tp / (tp + fn))
             with open(pkl.replace("full_results.pickle", "fpr-tpr-60.csv"), "w") as csv:
-                csv.write("FPR, " + str(fp / (fp + tn)) + "\n")
-                csv.write("TPR, " + str(tp / (tp + fn)))
+                csv.write("FPR, " + str(fp / (fp + tn)) + "\nTPR, " + str(tp / (tp + fn)))
+            with open("Hybrid Dataset/output/full_fpr_tpr_60.csv", "a") as csv:
+                csv.write(pkl.removeprefix("Hybrid Dataset/output/").removesuffix("/full_results.pickle") +
+                          ", {:.2f}".format(fp / (fp + tn)) +
+                          ", {:.2f}\n".format(tp / (tp + fn)))

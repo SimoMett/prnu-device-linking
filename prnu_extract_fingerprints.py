@@ -192,7 +192,7 @@ def procedure(video_path: str, threads_count, frames_count):
         print("Error during scene detect. Skipping..")
         return
 
-        # ground truth
+    # ground truth
     seq_idx = int(re.search(r'\d+', video_path.split("/")[-1]).group()) - 1
     clips_seq = devs_sequences[seq_idx]
     ground_truth = prnu.gt(clips_seq, clips_seq)
@@ -203,19 +203,12 @@ def procedure(video_path: str, threads_count, frames_count):
     for i in range(len(seq) - 1):
         print("Extracting frames from clip", i + 1)
         # end = seq[i + 1]
-        if frames_count == 'end':
-            end = seq[i + 1] - 1
-        else:
-            end = seq[i] + frames_count
+        end = seq[i + 1] - 1 if frames_count == 'end' else seq[i] + frames_count
         assert end < seq[i + 1]
         f = extract_frames(mp4file, list(range(seq[i], end)))
         print("Computing fingerprint..")
         K = extract_multiple_aligned(f, processes=threads_count, batch_size=threads_count)
         clips_fingerprints_k.append(K)
-
-    # print("Cross-correlation")
-    # aligned_cc = prnu.aligned_cc(np.array(clips_fingerprints_k), np.array(residuals_w))['cc']
-    # stats_cc = prnu.stats(aligned_cc, ground_truth)
 
     print("Peak to correlation energy")
     pce_rot = compute_pce(clips_fingerprints_k, clips_fingerprints_k)

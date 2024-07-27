@@ -7,6 +7,7 @@ def sequence_from_scenedetect(video_path):
     detectors = [AdaptiveDetector(adaptive_threshold=2.73, min_scene_len=240),
                  AdaptiveDetector(adaptive_threshold=2.73, weights=ContentDetector.Components(1.1, 1, 0, 1.3),
                                   min_scene_len=240),
+                 AdaptiveDetector(adaptive_threshold=2.6, min_scene_len=240),
                  ContentDetector(min_scene_len=240)]
     for detector in detectors:
         scene_list = detect(video_path, detector)
@@ -35,6 +36,7 @@ def verify_on_dataset():
         detectors = [AdaptiveDetector(adaptive_threshold=2.73, min_scene_len=240),
                      AdaptiveDetector(adaptive_threshold=2.73, weights=ContentDetector.Components(1.1, 1, 0, 1.3),
                                       min_scene_len=240),
+                     AdaptiveDetector(adaptive_threshold=2.6, min_scene_len=240),
                      ContentDetector(min_scene_len=240)]
         for i, detector in enumerate(detectors):
             scene_list = detect(v, detector)

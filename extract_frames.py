@@ -6,15 +6,16 @@ from PIL import Image
 from tqdm import tqdm
 
 
-def extract_frame(video_capture, frame_number):
+def extract_frame(video_capture: cv2.VideoCapture, frame_number):
     mp4file = video_capture
 
     mp4file.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
     res, frame = mp4file.read()
     return res, frame
 
+
 # deprecated
-def sequence_from_groundtruth(video_capture):
+def sequence_from_groundtruth(video_capture: cv2.VideoCapture):
     # The ground truth is: every 10 seconds there's a clip change
     seconds_between_clips = 10
     fps = int(video_capture.get(cv2.CAP_PROP_FPS))

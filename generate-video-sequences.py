@@ -63,6 +63,23 @@ def generate_video_sequences(seq, max_index, base_path):
     return
 
 
+def generate_mixed_videos(seq, max_index, base_path):
+    for i in range(max_index):
+        output_name = base_path + "output/Video_Mixed" + str(prnu_extract_fingerprints.devs_sequences.index(seq) + 1) + "_" + str(i) + ".mp4"
+        if os.path.isfile(output_name):
+            print("Skipping already present", output_name)
+            continue
+        video_clips = []
+        j = 0
+        for dev in seq:
+            paths = sorted(get_clips_paths(dev, base_path))
+            video_clips.append(paths[j % len(paths)])
+            j+=1
+        concatenate_videos(video_clips, output_name)
+        save_dataset_info(base_path, output_name, video_clips)
+    return
+
+
 def save_dataset_info(base_path, output_name, video_clips):
     with open("dataset_info.csv", "a") as f:
         f.write(",".join([output_name] + [v.removeprefix(base_path) for v in video_clips]) + "\n")
@@ -74,3 +91,4 @@ if __name__ == "__main__":
     base_path = "Hybrid Dataset/"
     for seq in prnu_extract_fingerprints.devs_sequences:
         generate_video_sequences(seq, max_index, base_path)
+    generate_mixed_videos(prnu_extract_fingerprints.devs_sequences[1], 5, base_path)

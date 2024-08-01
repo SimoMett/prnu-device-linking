@@ -172,6 +172,16 @@ def dump_frames(frames, idx):
     pass
 
 
+def get_clip_fingerprint(mp4file, i, seq, frames_count, threads_count):
+    print("Extracting frames from clip", i + 1)
+    end = seq[i + 1] - 1 if frames_count == 'end' else seq[i] + frames_count
+    assert end < seq[i + 1]
+    f = extract_frames(mp4file, list(range(seq[i], end)))
+    print("Computing fingerprint..")
+    K = extract_multiple_aligned(f, processes=threads_count, batch_size=threads_count)
+    return K
+
+
 def procedure(video_path: str, threads_count, frames_count):
     if frames_count == "end":
         dest_path = video_path.replace(".mp4", "/")
@@ -200,13 +210,8 @@ def procedure(video_path: str, threads_count, frames_count):
     clips_fingerprints_k = []
 
     for i in range(len(seq) - 1):
-        print("Extracting frames from clip", i + 1)
-        end = seq[i + 1] - 1 if frames_count == 'end' else seq[i] + frames_count
-        assert end < seq[i + 1]
-        f = extract_frames(mp4file, list(range(seq[i], end)))
-        print("Computing fingerprint..")
-        K = extract_multiple_aligned(f, processes=threads_count, batch_size=threads_count)
-        clips_fingerprints_k.append(K)
+        fingerprint = get_clip_fingerprint(mp4file, i, seq, frames_count, threads_count)
+        clips_fingerprints_k.append(fingerprint)
 
     print("Peak to correlation energy")
     pce_rot = compute_pce(clips_fingerprints_k, clips_fingerprints_k)

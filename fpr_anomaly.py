@@ -50,5 +50,5 @@ if __name__ == "__main__":
 
         pce_rot = compute_pce([f[1] for f in fingerprints], [f[1] for f in fingerprints])
         save_results(out, [f[0] for f in fingerprints], pce_rot)
-        fp, tp, fn, tn = roc_stats.get_roc_stats_by_threshold(np.identity(len(pce_rot)), pce_rot, 60)
+        fp, tp, fn, tn = roc_stats.get_roc_stats_by_threshold(np.ones(shape=pce_rot.shape), pce_rot, 60)
         print(fp, tp, fn, tn)

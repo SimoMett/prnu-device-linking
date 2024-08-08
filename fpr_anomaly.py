@@ -37,18 +37,29 @@ def save_results(output_path, row_names, pce_rot):
 if __name__ == "__main__":
     devices = ["D03_Huawei_P8Lite", "D38_Xiaomi_Redmi5Plus", "D08_Lenovo_TabE7", "D05_Huawei_P9Lite",
                "D28_Motorola_MotoG", "D18_Samsung_GalaxyS6", "D02_Apple_iPhone4_VISION", "D04_Xiaomi_RedmiNote8T"]
-    did = [3, 38, 8, 5, 28, 18, 4]
+    did = [3, 38, 8, 5, 28, 18, 2, 4]
 
-    for d in did[1::]:
+    for d in sorted(did):
         out = "D" + str(d) + "_fpr_anomaly_test.csv"
-        tt = []
-        for c in get_clips_paths(d, "Hybrid Dataset/"):
-            if any(x in c for x in ["/L3", "/L2", "/L7"]):
-                tt.append(c)
+        if not os.path.exists(out):
+            tt = []
+            for c in get_clips_paths(d, "Hybrid Dataset/"):
+                if any(x in c for x in ["/L3", "/L2", "/L7", "/outdoor"]):
+                    tt.append(c)
 
-        fingerprints = [[t.split('/')[-1], mp4_extract_multiple_aligned(t, 0, 250, 8)] for t in tt]
+            fingerprints = [[t.split('/')[-1], mp4_extract_multiple_aligned(t, 0, 250, 8)] for t in tt]
+            pce_rot = compute_pce([f[1] for f in fingerprints], [f[1] for f in fingerprints])
+            save_results(out, [f[0] for f in fingerprints], pce_rot)
+        else:
+            with open(out, "r") as csv:
+                lines = csv.readlines()[1::]
+                lines = [l[l.find(",")+1:].removesuffix("\n") for l in lines]
+                pce_rot = []
+                for l in lines:
+                    pce_rot.append([float(s) for s in l.split(",")])
+                pce_rot = np.array(pce_rot)
 
-        pce_rot = compute_pce([f[1] for f in fingerprints], [f[1] for f in fingerprints])
-        save_results(out, [f[0] for f in fingerprints], pce_rot)
         fp, tp, fn, tn = roc_stats.get_roc_stats_by_threshold(np.ones(shape=pce_rot.shape), pce_rot, 60)
-        print(fp, tp, fn, tn)
+        print("D{:02}:".format(d), fp, tp, fn, tn)
+
+

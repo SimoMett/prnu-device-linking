@@ -34,11 +34,10 @@ def save_results(output_path, row_names, pce_rot):
             output_file.write(row_names[ri] + "," + ",".join(("{:.1f}".format(i) for i in row)) + "\n")
 
 
-if __name__ == "__main__":
+def devices_test():
     devices = ["D03_Huawei_P8Lite", "D38_Xiaomi_Redmi5Plus", "D08_Lenovo_TabE7", "D05_Huawei_P9Lite",
                "D28_Motorola_MotoG", "D18_Samsung_GalaxyS6", "D02_Apple_iPhone4_VISION", "D04_Xiaomi_RedmiNote8T"]
     did = [3, 38, 8, 5, 28, 18, 2, 4]
-
     for d in sorted(did):
         out = "D" + str(d) + "_fpr_anomaly_test.csv"
         if not os.path.exists(out):
@@ -53,7 +52,7 @@ if __name__ == "__main__":
         else:
             with open(out, "r") as csv:
                 lines = csv.readlines()[1::]
-                lines = [l[l.find(",")+1:].removesuffix("\n") for l in lines]
+                lines = [l[l.find(",") + 1:].removesuffix("\n") for l in lines]
                 pce_rot = []
                 for l in lines:
                     pce_rot.append([float(s) for s in l.split(",")])
@@ -63,3 +62,9 @@ if __name__ == "__main__":
         print("D{:02}:".format(d), fp, tp, fn, tn)
 
 
+def brands_test():
+    pass
+
+
+if __name__ == "__main__":
+    devices_test()

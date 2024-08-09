@@ -50,7 +50,8 @@ def get_clips_paths(device, base_path):
 
 def generate_video_sequences(seq, max_index, base_path):
     for i in range(max_index):
-        output_name = base_path + "output/Video_Seq" + str(prnu_extract_fingerprints.devs_sequences.index(seq) + 1) + "_" + str(i) + ".mp4"
+        output_name = base_path + "output/Video_Seq" + str(
+            prnu_extract_fingerprints.devs_sequences.index(seq) + 1) + "_" + str(i) + ".mp4"
         if os.path.isfile(output_name):
             print("Skipping already present", output_name)
             continue
@@ -64,17 +65,18 @@ def generate_video_sequences(seq, max_index, base_path):
 
 
 def generate_mixed_videos(seq, max_index, base_path):
+    j = 0
     for i in range(max_index):
-        output_name = base_path + "output/Video_Mixed" + str(prnu_extract_fingerprints.devs_sequences.index(seq) + 1) + "_" + str(i) + ".mp4"
+        output_name = base_path + "output/Video_Mixed" + str(
+            prnu_extract_fingerprints.devs_sequences.index(seq) + 1) + "_" + str(i) + ".mp4"
         if os.path.isfile(output_name):
             print("Skipping already present", output_name)
             continue
         video_clips = []
-        j = 0
         for dev in seq:
             paths = sorted(get_clips_paths(dev, base_path))
             video_clips.append(paths[j % len(paths)])
-            j+=1
+            j += 1
         concatenate_videos(video_clips, output_name)
         save_dataset_info(base_path, output_name, video_clips)
     return
